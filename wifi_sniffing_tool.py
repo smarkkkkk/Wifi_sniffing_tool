@@ -83,7 +83,7 @@ if __name__ == "__main__":
     pkt_list = filter_packets(pcap_file_num)
 
     print('All packets filtered. \n'
-          'Data is now being extracted from packets.')
+          'Data is now being extracted from packets. \n')
 
     # Call function to extract relevant data from packets.
     extract_packet_data(pkt_list)
