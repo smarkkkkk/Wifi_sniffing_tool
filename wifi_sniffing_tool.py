@@ -9,8 +9,10 @@ def filter_packets(pcap_file):
     :param: user selected pacp file number [pcap_file]
     :return: list of filtered packets [pkt_list]
     """
+
     # Read packets
-    packets = rdpcap(pcap_dict[pcap_file])
+    pcap_fn = 'pcap_files/'+pcap_dict[pcap_file]
+    packets = rdpcap(pcap_fn)
 
     print('pcap file read successfully \n')
 
@@ -87,16 +89,3 @@ if __name__ == "__main__":
 
     # Call function to extract relevant data from packets.
     extract_packet_data(pkt_list)
-
-    if "00:25:9c:cf:8a:73" == "00:25:9c:cf:8a:71":
-        print('MAC filter not working')
-
-
-
-
-
-
-
-
-
-
