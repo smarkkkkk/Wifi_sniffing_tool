@@ -67,7 +67,10 @@ def extract_packet_data(filtered_packets):
         #print(codecs.getencoder(pkt.load))
         #print(pkt[RadioTap].present)
         #print(pkt[RadioTap].notdecoded)
-        print(pkt.RadioTap.datarate)
+        #print(pkt.radiotap.datarate)
+        print(ord(pkt.notdecoded[-2:-1]))
+        print(ord(pkt.notdecoded[-3:-2]))
+        print(ord(pkt.notdecoded[-5:-4]))
         try:
             extra = pkt.notdecoded
             rssi = -(256 - ord(extra[-4:-3]))  # ord returns an integer representing the Unicode code
