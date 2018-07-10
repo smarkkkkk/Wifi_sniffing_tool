@@ -1,4 +1,4 @@
-import numpy
+import numpy as np
 from scapy.all import *
 
 
@@ -54,16 +54,30 @@ def extract_packet_data(filtered_packets):
     :param: packets:
     :return:
     """
-
+    pkt_data = np.zeros((len(filtered_packets), 4))
+    pkt_incr = 0
     for pkt in filtered_packets:
-        # print(pkt.dBm_AntSignal)
+
+        print(pkt[0].show())
+        # print(pkt.ttl) This works
+        # print(pkt,seq) This should work
         try:
             extra = pkt.notdecoded
-            rssi = -(256 - ord(extra[-4:-3]))
+            # print(type(extra))
+            rssi = -(256 - ord(extra[-4:-3]))  # ord returns an integer representing the Unicode code
         except:
             rssi = -100
 
+        pkt_data[pkt_incr][0] = pkt_incr
+        pkt_data[pkt_incr][1] = rssi
+        pkt_data[pkt_incr][2] = pkt.ttl
+        pkt_data[pkt_incr][3] = pkt.seq
         # print('WiFi signal strength: {}'.format(rssi))
+
+        pkt_incr += 1
+
+    # pkt_data = pkt_data.astype(int)
+    np.savetxt('data.csv', pkt_data, fmt='%1.4e', delimiter='\t')
 
 
 if __name__ == "__main__":
