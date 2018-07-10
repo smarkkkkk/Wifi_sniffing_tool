@@ -1,4 +1,5 @@
 import numpy as np
+import pyshark
 from scapy.all import *
 
 
@@ -51,33 +52,37 @@ def extract_packet_data(filtered_packets):
     This function extracts data from the sniffed and filtered packets
     such as rssi, datarate, duration, antenna signal, ttl and seq
 
-    :param: packets:
+    :param: filtered_packets:
     :return:
     """
     pkt_data = np.zeros((len(filtered_packets), 4))
     pkt_incr = 0
+
     for pkt in filtered_packets:
 
         print(pkt[0].show())
-        # print(pkt.ttl) This works
-        # print(pkt,seq) This should work
+        #print(pkt[IP].ttl)
+        #print(pkt[TCP].seq)
+        #print(pkt.load)
+        #print(codecs.getencoder(pkt.load))
+        #print(pkt[RadioTap].present)
+        #print(pkt[RadioTap].notdecoded)
+        print(pkt.RadioTap.datarate)
         try:
             extra = pkt.notdecoded
-            # print(type(extra))
             rssi = -(256 - ord(extra[-4:-3]))  # ord returns an integer representing the Unicode code
         except:
             rssi = -100
 
         pkt_data[pkt_incr][0] = pkt_incr
         pkt_data[pkt_incr][1] = rssi
-        pkt_data[pkt_incr][2] = pkt.ttl
-        pkt_data[pkt_incr][3] = pkt.seq
-        # print('WiFi signal strength: {}'.format(rssi))
+        pkt_data[pkt_incr][2] = pkt[IP].ttl
+        pkt_data[pkt_incr][3] = pkt[TCP].seq
 
         pkt_incr += 1
 
     # pkt_data = pkt_data.astype(int)
-    np.savetxt('data.csv', pkt_data, fmt='%1.4e', delimiter='\t')
+    np.savetxt('data.csv', pkt_data, fmt='%1.10e', delimiter='\t')
 
 
 if __name__ == "__main__":
