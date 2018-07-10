@@ -6,3 +6,4 @@ lib/
 pcap_files/
 share/
 lib64
+.~lock.data.csv#
