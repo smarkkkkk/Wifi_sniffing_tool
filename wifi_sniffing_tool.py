@@ -1,5 +1,6 @@
 import numpy as np
 import pyshark
+import radiotap as r
 from scapy.all import *
 
 
@@ -59,8 +60,9 @@ def extract_packet_data_scapy(filtered_packets):
     pkt_incr = 0
 
     for pkt in filtered_packets:
-
-        print(pkt[0].show())
+        #off, radiotap = r.radiotap_parse(pkt)
+        #print(radiotap)
+        #print(pkt[0].show())
         #print(pkt[IP].ttl)
         #print(pkt[TCP].seq)
         #print(pkt.load)
@@ -111,8 +113,7 @@ def extract_packet_data_pyshark(filtered_packets):
     :return:
     """
     pkt_incr = 0
-    print(len(filtered_packets))
-    pkt_data = np.zeros((256, 5))
+    pkt_data = np.zeros((256, 5))  # Need to find a way of determining the 256 value without hard coding in
 
     for pkt in filtered_packets:
         pkt_data[pkt_incr][0] = pkt.radiotap.dbm_antsignal
@@ -120,8 +121,10 @@ def extract_packet_data_pyshark(filtered_packets):
         pkt_data[pkt_incr][2] = pkt.wlan.duration
         pkt_data[pkt_incr][3] = pkt.wlan.seq
         pkt_data[pkt_incr][4] = pkt.ip.ttl
-        print(pkt.radiotap.datarate, pkt.radiotap.dbm_antsignal, pkt.wlan.duration)
+        print(pkt.radiotap.dbm_antsignal, pkt.radiotap.datarate, pkt.wlan.duration, pkt.wlan.seq, pkt.ip.ttl)
         pkt_incr += 1
+
+    np.savetxt('data.csv', pkt_data, fmt='%1.10e', delimiter='\t')
 
 
 if __name__ == "__main__":
@@ -140,12 +143,12 @@ if __name__ == "__main__":
     pcap_file_num = str(input('Enter pcap file no. to use: '))
 
     # Call function to filter all packets.
-    # pkt_list = filter_packets_scapy(pcap_file_num)
+    #pkt_list = filter_packets_scapy(pcap_file_num)
     pkt_list = filter_packets_pyshark(pcap_file_num)
 
     print('All packets filtered. \n'
           'Data is now being extracted from packets. \n')
 
     # Call function to extract relevant data from packets.
-    # extract_packet_data_scapy(pkt_list)
+    #extract_packet_data_scapy(pkt_list)
     extract_packet_data_pyshark(pkt_list)
