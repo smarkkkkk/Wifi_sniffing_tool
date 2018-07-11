@@ -3,7 +3,7 @@ import pyshark
 from scapy.all import *
 
 
-def filter_packets(pcap_file):
+def filter_packets_scapy(pcap_file):
     """
     This function loads a pcap file and filters all the packets
 
@@ -47,7 +47,7 @@ def filter_packets(pcap_file):
     return pkt_list
 
 
-def extract_packet_data(filtered_packets):
+def extract_packet_data_scapy(filtered_packets):
     """
     This function extracts data from the sniffed and filtered packets
     such as rssi, datarate, duration, antenna signal, ttl and seq
@@ -68,9 +68,10 @@ def extract_packet_data(filtered_packets):
         #print(pkt[RadioTap].present)
         #print(pkt[RadioTap].notdecoded)
         #print(pkt.radiotap.datarate)
-        print(ord(pkt.notdecoded[-2:-1]))
-        print(ord(pkt.notdecoded[-3:-2]))
-        print(ord(pkt.notdecoded[-5:-4]))
+        #print(ord(pkt.notdecoded[-2:-1]))
+        #print(ord(pkt.notdecoded[-3:-2]))
+        #print(ord(pkt.notdecoded[-5:-4]))
+
         try:
             extra = pkt.notdecoded
             rssi = -(256 - ord(extra[-4:-3]))  # ord returns an integer representing the Unicode code
@@ -78,14 +79,49 @@ def extract_packet_data(filtered_packets):
             rssi = -100
 
         pkt_data[pkt_incr][0] = pkt_incr
-        pkt_data[pkt_incr][1] = rssi
-        pkt_data[pkt_incr][2] = pkt[IP].ttl
-        pkt_data[pkt_incr][3] = pkt[TCP].seq
+        pkt_data[pkt_incr][1] = rssi  # rssi value is taken from unproven formula
+        pkt_data[pkt_incr][2] = pkt[IP].ttl  # this value seems correct
+        pkt_data[pkt_incr][3] = pkt[TCP].seq  # This is incorrect sequence
 
         pkt_incr += 1
 
     # pkt_data = pkt_data.astype(int)
     np.savetxt('data.csv', pkt_data, fmt='%1.10e', delimiter='\t')
+
+
+def filter_packets_pyshark(pcap_file):
+    """
+
+    :param pcap_file:
+    :return: pkt_list:
+    """
+    pcap_fn = 'pcap_files/' + pcap_dict[pcap_file]
+    print(pcap_fn)
+    pkt_list = pyshark.FileCapture(pcap_fn, display_filter='(wlan.sa==00:25:9c:cf:8a:73 || wlan.sa==00:25:9c:cf:8a:71)'
+                                                           '&&(wlan.da==40:c3:36:07:d4:bf||wlan.da==ff:ff:ff:ff:ff:ff)'
+                                                           '&&!(wlan.fc.type==0)&&tcp')
+
+    return pkt_list
+
+
+def extract_packet_data_pyshark(filtered_packets):
+    """
+
+    :param filtered_packets:
+    :return:
+    """
+    pkt_incr = 0
+    print(len(filtered_packets))
+    pkt_data = np.zeros((256, 5))
+
+    for pkt in filtered_packets:
+        pkt_data[pkt_incr][0] = pkt.radiotap.dbm_antsignal
+        pkt_data[pkt_incr][1] = pkt.radiotap.datarate
+        pkt_data[pkt_incr][2] = pkt.wlan.duration
+        pkt_data[pkt_incr][3] = pkt.wlan.seq
+        pkt_data[pkt_incr][4] = pkt.ip.ttl
+        print(pkt.radiotap.datarate, pkt.radiotap.dbm_antsignal, pkt.wlan.duration)
+        pkt_incr += 1
 
 
 if __name__ == "__main__":
@@ -104,10 +140,12 @@ if __name__ == "__main__":
     pcap_file_num = str(input('Enter pcap file no. to use: '))
 
     # Call function to filter all packets.
-    pkt_list = filter_packets(pcap_file_num)
+    # pkt_list = filter_packets_scapy(pcap_file_num)
+    pkt_list = filter_packets_pyshark(pcap_file_num)
 
     print('All packets filtered. \n'
           'Data is now being extracted from packets. \n')
 
     # Call function to extract relevant data from packets.
-    extract_packet_data(pkt_list)
+    # extract_packet_data_scapy(pkt_list)
+    extract_packet_data_pyshark(pkt_list)
