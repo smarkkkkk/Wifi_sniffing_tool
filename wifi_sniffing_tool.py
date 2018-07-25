@@ -146,8 +146,8 @@ if __name__ == "__main__":
     # Allow user to decide whether to sniff in real time or load a pcap file
     while 1:
         sniff_option = int(input('Select packet sniffing option:'
-                             '1. Sniff packets online - '
-                             '2. Load pcap file - '))
+                                 '1. Sniff packets online - '
+                                 '2. Load pcap file - '))
 
         if sniff_option == 1:
             # Sniff packets in real time
@@ -181,6 +181,6 @@ if __name__ == "__main__":
             # extract_packet_data_scapy(pkt_list)
             extract_packet_data_pyshark(pkt_list)
             break
-            
+
         else:
             print('Please enter either 1 or 2 from keyboard.')
