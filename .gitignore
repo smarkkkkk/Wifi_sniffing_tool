@@ -1,10 +1,6 @@
-pyvenv.cfg
-pip-selfcheck.json
-bin/
-include/
-lib/
+
 pcap_files/
-share/
-lib64
-.~lock.data.csv#
-python-radiotap/
+#.~lock.data.csv#
+
+#.idea/
+.*
