@@ -1,6 +1,6 @@
 import numpy as np
 import pyshark
-import radiotap as r
+#import radiotap as r
 from scapy.all import *
 
 
@@ -103,6 +103,9 @@ def filter_packets_pyshark(pcap_file):
                                                            '&&(wlan.da==40:c3:36:07:d4:bf||wlan.da==ff:ff:ff:ff:ff:ff)'
                                                            '&&!(wlan.fc.type==0)&&tcp')
 
+    # packet_list = []
+    # packet_list.append(pkt_list)
+    # print(len(packet_list))
     return pkt_list
 
 
@@ -121,11 +124,23 @@ def extract_packet_data_pyshark(filtered_packets):
         pkt_data[pkt_incr][2] = pkt.wlan.duration
         pkt_data[pkt_incr][3] = pkt.wlan.seq
         pkt_data[pkt_incr][4] = pkt.ip.ttl
-        print(pkt.radiotap.dbm_antsignal, pkt.radiotap.datarate, pkt.wlan.duration, pkt.wlan.seq, pkt.ip.ttl)
+        # print(pkt.radiotap.dbm_antsignal, pkt.radiotap.datarate, pkt.wlan.duration, pkt.wlan.seq, pkt.ip.ttl)
         pkt_incr += 1
 
     np.savetxt('data.csv', pkt_data, fmt='%1.10e', delimiter='\t')
 
+'''
+def live_capture():
+
+    capture = pyshark.LiveCapture(interface='wlan0mon', display_filter='(wlan.sa==00:25:9c:cf:8a:73 || '
+                                                                       'wlan.sa==00:25:9c:cf:8a:71)'
+                                                                       '&&(wlan.da==40:c3:36:07:d4:bf||'
+                                                                       'wlan.da==ff:ff:ff:ff:ff:ff)'
+                                                                       '&&!(wlan.fc.type==0)&&tcp')
+
+    for pkt in capture.sniff_continuously(packet_count=200):
+        print(pkt.radiotap.dbm_antsignal, pkt.radiotap.datarate, pkt.wlan.duration, pkt.wlan.seq, pkt.ip.ttl)
+'''
 
 if __name__ == "__main__":
     # Lookup dict for different pcap files
@@ -143,12 +158,14 @@ if __name__ == "__main__":
     pcap_file_num = str(input('Enter pcap file no. to use: '))
 
     # Call function to filter all packets.
-    #pkt_list = filter_packets_scapy(pcap_file_num)
+    # pkt_list = filter_packets_scapy(pcap_file_num)
     pkt_list = filter_packets_pyshark(pcap_file_num)
 
     print('All packets filtered. \n'
           'Data is now being extracted from packets. \n')
 
     # Call function to extract relevant data from packets.
-    #extract_packet_data_scapy(pkt_list)
+    # extract_packet_data_scapy(pkt_list)
     extract_packet_data_pyshark(pkt_list)
+
+    #live_capture()
