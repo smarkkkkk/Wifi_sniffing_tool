@@ -98,7 +98,7 @@ def filter_packets_pyshark(pcap_file):
     :return: pkt_list:
     """
     pcap_fn = 'pcap_files/' + pcap_dict[pcap_file]
-    print(pcap_fn)
+
     pkt_list = pyshark.FileCapture(pcap_fn, display_filter='(wlan.sa==00:25:9c:cf:8a:73 || wlan.sa==00:25:9c:cf:8a:71)'
                                                            '&&(wlan.da==40:c3:36:07:d4:bf||wlan.da==ff:ff:ff:ff:ff:ff)'
                                                            '&&!(wlan.fc.type==0)&&tcp')
@@ -129,9 +129,9 @@ def extract_packet_data_pyshark(filtered_packets):
 
     np.savetxt('data.csv', pkt_data, fmt='%1.10e', delimiter='\t')
 
-'''
-def live_capture():
 
+def live_capture():
+    # may need to change interface string depending on what monitor mode interface appears from airmon-ng command
     capture = pyshark.LiveCapture(interface='wlan0mon', display_filter='(wlan.sa==00:25:9c:cf:8a:73 || '
                                                                        'wlan.sa==00:25:9c:cf:8a:71)'
                                                                        '&&(wlan.da==40:c3:36:07:d4:bf||'
@@ -140,32 +140,47 @@ def live_capture():
 
     for pkt in capture.sniff_continuously(packet_count=200):
         print(pkt.radiotap.dbm_antsignal, pkt.radiotap.datarate, pkt.wlan.duration, pkt.wlan.seq, pkt.ip.ttl)
-'''
+
 
 if __name__ == "__main__":
-    # Lookup dict for different pcap files
-    pcap_dict = {'1': 'variable_rate_normal_mon_VP',
-                 '2': 'variable_rate_attack01_mon_VP',
-                 '3': 'variable_rate_attack02_mon_VP',
-                 '4': 'variable_rate_inthemix_mon_VP'}
+    # Allow user to decide whether to sniff in real time or load a pcap file
+    while 1:
+        sniff_option = int(input('Select packet sniffing option:'
+                             '1. Sniff packets online - '
+                             '2. Load pcap file - '))
 
-    # Menu of options for which pcap file to process
-    print('1. variable_rate_normal_mon_VP \n'
-          '2. variabel_rate_attack01_mon_VP \n'
-          '3. variable_rate_attack02_mon_VP \n'
-          '4. variable_rate_inthemix_mon_VP')
+        if sniff_option == 1:
+            # Sniff packets in real time
+            live_capture()
+            break
 
-    pcap_file_num = str(input('Enter pcap file no. to use: '))
+        elif sniff_option == 2:
 
-    # Call function to filter all packets.
-    # pkt_list = filter_packets_scapy(pcap_file_num)
-    pkt_list = filter_packets_pyshark(pcap_file_num)
+            # Lookup dict for different pcap files
+            pcap_dict = {'1': 'variable_rate_normal_mon_VP',
+                         '2': 'variable_rate_attack01_mon_VP',
+                         '3': 'variable_rate_attack02_mon_VP',
+                         '4': 'variable_rate_inthemix_mon_VP'}
 
-    print('All packets filtered. \n'
-          'Data is now being extracted from packets. \n')
+            # Menu of options for which pcap file to process
+            print('1. variable_rate_normal_mon_VP \n'
+                  '2. variabel_rate_attack01_mon_VP \n'
+                  '3. variable_rate_attack02_mon_VP \n'
+                  '4. variable_rate_inthemix_mon_VP')
 
-    # Call function to extract relevant data from packets.
-    # extract_packet_data_scapy(pkt_list)
-    extract_packet_data_pyshark(pkt_list)
+            pcap_file_num = str(input('Enter pcap file no. to use: '))
 
-    #live_capture()
+            # Call function to filter all packets.
+            # pkt_list = filter_packets_scapy(pcap_file_num)
+            pkt_list = filter_packets_pyshark(pcap_file_num)
+
+            print('All packets filtered. \n'
+                  'Data is now being extracted from packets. \n')
+
+            # Call function to extract relevant data from packets.
+            # extract_packet_data_scapy(pkt_list)
+            extract_packet_data_pyshark(pkt_list)
+            break
+            
+        else:
+            print('Please enter either 1 or 2 from keyboard.')
