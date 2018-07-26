@@ -145,9 +145,9 @@ def live_capture():
 if __name__ == "__main__":
     # Allow user to decide whether to sniff in real time or load a pcap file
     while 1:
-        sniff_option = int(input('Select packet sniffing option:'
-                                 '1. Sniff packets online - '
-                                 '2. Load pcap file - '))
+        sniff_option = int(input('Select packet sniffing option: \n'
+                                 '1. Sniff packets online - \n'
+                                 '2. Load pcap file - \n'))
 
         if sniff_option == 1:
             # Sniff packets in real time
