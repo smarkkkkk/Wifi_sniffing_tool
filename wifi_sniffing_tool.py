@@ -1,6 +1,8 @@
 import numpy as np
 import pyshark
-#import radiotap as r
+import math
+import statistics
+import csv
 from scapy.all import *
 
 
@@ -113,21 +115,45 @@ def extract_packet_data_pyshark(filtered_packets):
     """
 
     :param filtered_packets:
-    :return:
+    :return: pkt_data
     """
-    pkt_incr = 0
-    pkt_data = np.zeros((256, 5))  # Need to find a way of determining the 256 value without hard coding in
+
+    dbm_antsignal = []
+    datarate = []
+    duration = []
+    seq = []
+    ttl = []
+    # try and except statement in here to ensure that every filtered packet is read in
+    # due to length of filtered_packets not being previously known
 
     for pkt in filtered_packets:
-        pkt_data[pkt_incr][0] = pkt.radiotap.dbm_antsignal
-        pkt_data[pkt_incr][1] = pkt.radiotap.datarate
-        pkt_data[pkt_incr][2] = pkt.wlan.duration
-        pkt_data[pkt_incr][3] = pkt.wlan.seq
-        pkt_data[pkt_incr][4] = pkt.ip.ttl
-        # print(pkt.radiotap.dbm_antsignal, pkt.radiotap.datarate, pkt.wlan.duration, pkt.wlan.seq, pkt.ip.ttl)
-        pkt_incr += 1
+        dbm_antsignal.append(pkt.radiotap.dbm_antsignal)
+        datarate.append(pkt.radiotap.datarate)
+        duration.append(pkt.wlan.duration)
+        seq.append(pkt.wlan.seq)
+        ttl.append(pkt.ip.ttl)
 
-    np.savetxt('data.csv', pkt_data, fmt='%1.10e', delimiter='\t')
+
+    dbm_antsignal = np.asarray(dbm_antsignal)
+    datarate = np.asarray(datarate)
+    duration = np.asarray(duration)
+    seq = np.asarray(seq)
+    ttl = np.asarray(ttl)
+
+    pkt_incr = 0
+    pkt_data = np.zeros((len(dbm_antsignal), 5))  # Need to find a way of determining the 256 value without hard coding in
+
+    while pkt_incr <= len(dbm_antsignal):
+        pkt_data[pkt_incr][0] =
+        pkt_data[pkt_incr][1] =
+        pkt_data[pkt_incr][2] =
+        pkt_data[pkt_incr][3] =
+        pkt_data[pkt_incr][4] =
+        #print(pkt.radiotap.dbm_antsignal, pkt.radiotap.datarate, pkt.wlan.duration, pkt.wlan.seq, pkt.ip.ttl)
+        pkt_incr += 1
+    #np.savetxt('data.csv', pkt_data, fmt='%1.10e', delimiter='\t')
+
+    #return pkt_data
 
 
 def live_capture():
@@ -140,6 +166,16 @@ def live_capture():
 
     for pkt in capture.sniff_continuously(packet_count=200):
         print(pkt.radiotap.dbm_antsignal, pkt.radiotap.datarate, pkt.wlan.duration, pkt.wlan.seq, pkt.ip.ttl)
+
+
+def feature_statistics(data):
+
+    with open('data.csv', 'r') as datafile:
+
+        data_reader = csv.reader(datafile, delimiter='\t')
+
+        for row in data_reader:
+            print(row)
 
 
 if __name__ == "__main__":
@@ -179,7 +215,9 @@ if __name__ == "__main__":
 
             # Call function to extract relevant data from packets.
             # extract_packet_data_scapy(pkt_list)
-            extract_packet_data_pyshark(pkt_list)
+            packet_data = extract_packet_data_pyshark(pkt_list)
+
+            #feature_statistics(packet_data)
             break
 
         else:
