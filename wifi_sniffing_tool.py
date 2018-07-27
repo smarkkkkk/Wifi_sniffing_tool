@@ -112,7 +112,11 @@ def filter_packets_pyshark(pcap_file):
 
 
 def extract_packet_data_pyshark(filtered_packets):
+    """
 
+    :param filtered_packets:
+    :return: dbm_antsignal, datarate, duration, seq, ttl
+    """
     # Initialise empty lists for packet features
     dbm_antsignal = []
     datarate = []
@@ -169,12 +173,43 @@ def feature_statistics(dbm_antsignal, datarate, duration, seq, ttl):
     print(dbm_antsignal, datarate, duration, seq, ttl)
 
 
+# Possibly change Statistics to PacketAnalysis, PacketStats ?
+class Statistics():
+
+    # Not sure what needs to go in __init__ yet? Probably not mean and mode? Mean and mode need to be calculated
+    # and then fed in as reference values for the new packets to be compared to. Maybe separate class for mean and mode
+    # calculations andseparate class for comparing new packet values to the mean and mode reference values.
+
+    #def __init__(self, mean=0, mode=0, ref_val=0):
+        #self.mean = mean
+        #self.mode = mode
+        #self.ref_val = ref_val
+    
+    def mean(self, nums):
+        """
+        Returns the mean of the numbers
+        :param nums:
+        :return:
+        """
+
+    def mode(self, nums):
+        """
+        Returns the mode of the numbers
+        :param nums:
+        :return:
+        """
+    def diff_from_ave(self, ref_val):
+
+
+
+
 if __name__ == "__main__":
     # Allow user to decide whether to sniff in real time or load a pcap file
     while 1:
-        sniff_option = int(input('Select packet sniffing option: \n'
-                                 '1. Sniff packets online - \n'
-                                 '2. Load pcap file - \n'))
+        print('1. Sniff packets online \n'
+              '2. Load pcap file \n')
+
+        sniff_option = int(input('Select packet sniffing option: \n'))
 
         if sniff_option == 1:
             # Sniff packets in real time
