@@ -112,18 +112,15 @@ def filter_packets_pyshark(pcap_file):
 
 
 def extract_packet_data_pyshark(filtered_packets):
-    """
 
-    :param filtered_packets:
-    :return: pkt_data
-    """
-
+    # Initialise empty lists for packet features
     dbm_antsignal = []
     datarate = []
     duration = []
     seq = []
     ttl = []
 
+    # Extract all data from packets into lists
     for pkt in filtered_packets:
         dbm_antsignal.append(pkt.radiotap.dbm_antsignal)
         datarate.append(pkt.radiotap.datarate)
@@ -148,12 +145,12 @@ def extract_packet_data_pyshark(filtered_packets):
         pkt_data[pkt_incr][2] = duration[pkt_incr]
         pkt_data[pkt_incr][3] = seq[pkt_incr]
         pkt_data[pkt_incr][4] = ttl[pkt_incr]
-        print(dbm_antsignal[pkt_incr], datarate[pkt_incr], duration[pkt_incr], seq[pkt_incr], ttl[pkt_incr])
+        # print(dbm_antsignal[pkt_incr], datarate[pkt_incr], duration[pkt_incr], seq[pkt_incr], ttl[pkt_incr])
         pkt_incr += 1
 
     np.savetxt('data.csv', pkt_data, fmt='%1.10e', delimiter='\t')
 
-    return pkt_data
+    return dbm_antsignal, datarate, duration, seq, ttl
 
 
 def live_capture():
@@ -168,14 +165,8 @@ def live_capture():
         print(pkt.radiotap.dbm_antsignal, pkt.radiotap.datarate, pkt.wlan.duration, pkt.wlan.seq, pkt.ip.ttl)
 
 
-def feature_statistics(data):
-
-    with open('data.csv', 'r') as datafile:
-
-        data_reader = csv.reader(datafile, delimiter='\t')
-
-        for row in data_reader:
-            print(row)
+def feature_statistics(dbm_antsignal, datarate, duration, seq, ttl):
+    print(dbm_antsignal, datarate, duration, seq, ttl)
 
 
 if __name__ == "__main__":
@@ -215,9 +206,9 @@ if __name__ == "__main__":
 
             # Call function to extract relevant data from packets.
             # extract_packet_data_scapy(pkt_list)
-            packet_data = extract_packet_data_pyshark(pkt_list)
+            dbm_antsignal, datarate, duration, seq, ttl = extract_packet_data_pyshark(pkt_list)
 
-            #feature_statistics(packet_data)
+            feature_statistics(dbm_antsignal, datarate, duration, seq, ttl)
             break
 
         else:
