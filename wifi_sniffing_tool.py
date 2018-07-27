@@ -123,8 +123,6 @@ def extract_packet_data_pyshark(filtered_packets):
     duration = []
     seq = []
     ttl = []
-    # try and except statement in here to ensure that every filtered packet is read in
-    # due to length of filtered_packets not being previously known
 
     for pkt in filtered_packets:
         dbm_antsignal.append(pkt.radiotap.dbm_antsignal)
@@ -133,27 +131,29 @@ def extract_packet_data_pyshark(filtered_packets):
         seq.append(pkt.wlan.seq)
         ttl.append(pkt.ip.ttl)
 
-
+    # Convert all packet feature lists to numpy arrays
     dbm_antsignal = np.asarray(dbm_antsignal)
     datarate = np.asarray(datarate)
     duration = np.asarray(duration)
     seq = np.asarray(seq)
     ttl = np.asarray(ttl)
 
+    # Write all packet feature data to .csv file
     pkt_incr = 0
-    pkt_data = np.zeros((len(dbm_antsignal), 5))  # Need to find a way of determining the 256 value without hard coding in
+    pkt_data = np.zeros((len(dbm_antsignal), 5))
 
-    while pkt_incr <= len(dbm_antsignal):
-        pkt_data[pkt_incr][0] =
-        pkt_data[pkt_incr][1] =
-        pkt_data[pkt_incr][2] =
-        pkt_data[pkt_incr][3] =
-        pkt_data[pkt_incr][4] =
-        #print(pkt.radiotap.dbm_antsignal, pkt.radiotap.datarate, pkt.wlan.duration, pkt.wlan.seq, pkt.ip.ttl)
+    while pkt_incr < len(dbm_antsignal):
+        pkt_data[pkt_incr][0] = dbm_antsignal[pkt_incr]
+        pkt_data[pkt_incr][1] = datarate[pkt_incr]
+        pkt_data[pkt_incr][2] = duration[pkt_incr]
+        pkt_data[pkt_incr][3] = seq[pkt_incr]
+        pkt_data[pkt_incr][4] = ttl[pkt_incr]
+        print(dbm_antsignal[pkt_incr], datarate[pkt_incr], duration[pkt_incr], seq[pkt_incr], ttl[pkt_incr])
         pkt_incr += 1
-    #np.savetxt('data.csv', pkt_data, fmt='%1.10e', delimiter='\t')
 
-    #return pkt_data
+    np.savetxt('data.csv', pkt_data, fmt='%1.10e', delimiter='\t')
+
+    return pkt_data
 
 
 def live_capture():
