@@ -126,11 +126,11 @@ def extract_packet_data_pyshark(filtered_packets):
 
     # Extract all data from packets into lists
     for pkt in filtered_packets:
-        dbm_antsignal.append(pkt.radiotap.dbm_antsignal)
-        datarate.append(pkt.radiotap.datarate)
-        duration.append(pkt.wlan.duration)
-        seq.append(pkt.wlan.seq)
-        ttl.append(pkt.ip.ttl)
+        dbm_antsignal.append(int(pkt.radiotap.dbm_antsignal))
+        datarate.append(int(pkt.radiotap.datarate))
+        duration.append(int(pkt.wlan.duration))
+        seq.append(int(pkt.wlan.seq))
+        ttl.append(int(pkt.ip.ttl))
 
     # Convert all packet feature lists to numpy arrays
     dbm_antsignal = np.asarray(dbm_antsignal)
@@ -171,6 +171,9 @@ def live_capture():
 
 def feature_statistics(dbm_antsignal, datarate, duration, seq, ttl):
     print(dbm_antsignal, datarate, duration, seq, ttl)
+    print(type(seq[1]))
+    s = Statistics()
+    print(s.mean(datarate))
 
 
 # Possibly change Statistics to PacketAnalysis, PacketStats ?
@@ -178,38 +181,48 @@ class Statistics():
 
     # Not sure what needs to go in __init__ yet? Probably not mean and mode? Mean and mode need to be calculated
     # and then fed in as reference values for the new packets to be compared to. Maybe separate class for mean and mode
-    # calculations andseparate class for comparing new packet values to the mean and mode reference values.
+    # calculations and separate class for comparing new packet values to the mean and mode reference values.
 
     #def __init__(self, mean=0, mode=0, ref_val=0):
         #self.mean = mean
         #self.mode = mode
         #self.ref_val = ref_val
-    
-    def mean(self, nums):
+
+    def mean(self, data):
         """
         Returns the mean of the numbers
         :param nums:
         :return:
         """
+        data = data[0:30]
 
-    def mode(self, nums):
+        return statistics.mean(data)
+
+    def mode(self, data):
         """
         Returns the mode of the numbers
         :param nums:
         :return:
         """
+        data = data[0:30]
+
+        return statistics.mode(data)
+
     def diff_from_ave(self, ref_val):
+        """
 
-
+        :param ref_val:
+        :return:
+        """
 
 
 if __name__ == "__main__":
     # Allow user to decide whether to sniff in real time or load a pcap file
     while 1:
         print('1. Sniff packets online \n'
-              '2. Load pcap file \n')
+              '2. Load pcap file ')
 
-        sniff_option = int(input('Select packet sniffing option: \n'))
+        sniff_option = int(input('Select packet sniffing option: '))
 
         if sniff_option == 1:
             # Sniff packets in real time
