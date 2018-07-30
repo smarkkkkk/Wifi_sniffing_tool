@@ -118,7 +118,7 @@ def extract_packet_data_pyshark(filtered_packets):
     :return: dbm_antsignal, datarate, duration, seq, ttl
     """
     # Initialise empty lists for packet features
-    dbm_antsignal = []
+    dbm_antsignal = [] # Received Signal Strength Indication RSSI
     datarate = []
     duration = []
     seq = []
