@@ -3,6 +3,7 @@ import pyshark
 import math
 import statistics
 import csv
+import argparse
 from scapy.all import *
 
 
@@ -118,7 +119,7 @@ def extract_packet_data_pyshark(filtered_packets):
     :return: dbm_antsignal, datarate, duration, seq, ttl
     """
     # Initialise empty lists for packet features
-    dbm_antsignal = [] # Received Signal Strength Indication RSSI
+    dbm_antsignal = []  # Received Signal Strength Indication RSSI
     datarate = []
     duration = []
     seq = []
@@ -170,31 +171,104 @@ def live_capture():
 
 
 def feature_statistics(dbm_antsignal, datarate, duration, seq, ttl):
-    print(dbm_antsignal, datarate, duration, seq, ttl)
-    print(type(seq[1]))
-    s = Statistics()
-    print(s.mean(datarate))
+    stats = PacketStatistics()
+
+    # Extract the first 30 packets (or x amount set by user)
+    # Store in new arrays
+    # Take and store averages for each new array
+    # Take next packet
+    # Compare new packet with averages
+    # Add or disregard new package
+
+    # sw -> sliding window + 'feature name'
+    sw_dbm_antsignal = dbm_antsignal[0:30]
+    sw_datarate = datarate[0:30]
+    sw_duration = duration[0:30]
+    sw_seq = seq[0:30]
+    sw_ttl = ttl[0:30]
+
+
+    array_dict = {'sw_dbm_antsignal':sw_dbm_antsignal, 'sw_datarate':sw_datarate,
+                  'sw_duration':sw_duration, 'sw_seq':sw_seq, 'sw_ttl':sw_ttl }
+    ave_dict = {}
+
+    # loop over each array and calculate the mean for each array storing it in new dictionary
+    for k, v in array_dict.items():
+        ave_dict[k] = mean(v)
+
+
+def initialise_feature_arrays(dbm_antsignal, datarate, duration, seq, ttl):
+
+    # sw -> sliding window + '_feature_name'
+    sw_dbm_antsignal = dbm_antsignal[0:30]
+    sw_datarate = datarate[0:30]
+    sw_duration = duration[0:30]
+    sw_seq = seq[0:30]
+    sw_ttl = ttl[0:30]
+
+    array_dict = {'sw_dbm_antsignal': sw_dbm_antsignal, 'sw_datarate': sw_datarate,
+                  'sw_duration': sw_duration, 'sw_seq': sw_seq, 'sw_ttl': sw_ttl}
+    ave_dict = {}
+
+    # loop over each array and calculate the mean for each array storing it in new dictionary
+    for k, v in array_dict.items():
+        ave_dict[k] = mean(v)
+
+    print(ave_dict)
+
+    # Loop through the arrays, extract the next pacekts one at a time
+    # compare features with average values and then add or disregard
+    # then update averages
+    for x in range(start=(30+1), stop=len(dbm_antsignal), step=1):
+        for key, arrays in array_dict.items():
+            for key, ave in ave_dict.items():
+                distance(ave,arrays(x))
+
+    return array_dict, ave_dict
+
+
+def analyse_packets(array_dict, ave_dict):
+
+
+# Maybe put these three functions inside their own class called PacketAnalysis()?
+def mean(data):
+    return statistics.mean(data)
+
+
+def mode(data):
+    return statistics.mode(data)
+
+
+def distance(ave, new_val):
+    return abs(ave - new_val)
+
 
 
 # Possibly change Statistics to PacketAnalysis, PacketStats ?
-class Statistics():
-
+class PacketStatistics():
+    ave_length = 0
     # Not sure what needs to go in __init__ yet? Probably not mean and mode? Mean and mode need to be calculated
     # and then fed in as reference values for the new packets to be compared to. Maybe separate class for mean and mode
     # calculations and separate class for comparing new packet values to the mean and mode reference values.
 
-    #def __init__(self, mean=0, mode=0, ref_val=0):
-        #self.mean = mean
-        #self.mode = mode
-        #self.ref_val = ref_val
+    # def __init__(self, rssi_mean, rate_mean, duration_mean, seq_mean, ttl_mean):
+    #     # Some of these will become mode rather than mean
+    #     # These are all instance variables?
+    #     self._rssi_mean = rssi_mean
+    #     self._rate_mean = rate_mean
+    #     self._duration_mean = duration_mean
+    #     self._seq_mean = seq_mean
+    #     self._ttl_mean = ttl_mean
 
-    def mean(self, data):
+    # @staticmethod  # will remove the 'static' warning
+    def mean(self, data):  # This is an instance method?
         """
         Returns the mean of the numbers
-        :param nums:
+        :param data
         :return:
         """
-        data = data[0:30]
+        self.is_not_used()  # removes the 'static' warning from PyCharm
+        data = data[0:self.ave_length]  # Step 1 - extracts 30 data values
 
         return statistics.mean(data)
 
@@ -204,7 +278,8 @@ class Statistics():
         :param nums:
         :return:
         """
-        data = data[0:30]
+        self.is_not_used()  # removes the 'static' warning from PyCharm
+        data = data[0:self.ave_length]
 
         return statistics.mode(data)
 
@@ -215,8 +290,30 @@ class Statistics():
         :return:
         """
 
+    def is_not_used(self):
+        pass
+
+
+class SlidingWindow(PacketStatistics):
+    def __int__(self):
+        PacketStatistics.__init__(self)
+
+    def compare_values(self):
+
+    def extract_data(self):
+
 
 if __name__ == "__main__":
+    # Set up cmd line argument parser
+    ap = argparse.ArgumentParser()
+    ap.add_argument("-f", "--file", required=False,
+                    help="the pcap file to load (include path if not in wd)")
+    ap.add_argument("-o", "--online", required=False,
+                    help="initiate online packet sniffing")
+    ap.add_argument("-n", "--number", required=False,
+                    help="the number of packets to include in sliding window, (10, 30, 50, 100)")
+    args = vars(ap.parse_args())
+
     # Allow user to decide whether to sniff in real time or load a pcap file
     while 1:
         print('1. Sniff packets online \n'
