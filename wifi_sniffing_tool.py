@@ -327,33 +327,45 @@ if __name__ == "__main__":
                     help="specify file to save packet data too")
     ap.add_argument("-o", "--online",
                     help="initiate online packet sniffing")
-    ap.add_argument("-s", "--sliding_window", type=int,
+    ap.add_argument("-s", "--sliding_window",
                     help="the number of packets to include in sliding window, (e.g. 10, 30, 50, 100)")
 
     # read arguments from the command line
     args = ap.parse_args()
 
-    if args.input_file and not args.online:
+    # set up cmd line variables for use in script
+    # check to make sure online mode and read from file haven't both been set
+
+    if not args.online and not args.input_file:
+        raise IndexError('Must provide either --input_file or --online with command line, use --help for further info.')
+
+    elif args.input_file and not args.online:
         pcap_file = args.input_file
+    #elif not args.online and not args.input_file:
+        #print('Please select either online packet sniffing or load packets from pcap. '
+              #'Use --help for further info.')
     else:
         print('Can only specify either online packet sniffing or load packets from file, not both. '
               'Use --help for further info')
-        
-    elif not args.online and not args.input_file:
-        print('Please select either online packet sniffing or load packets from pcap. '
-              'Use --help for further info.')
 
     if args.output_file:
         data_file = args.output_file
-    if args.sliding_window:
+
+    # ensure sliding window value is an integer
+    try:
         sw_val = args.sliding_window
 
+    except ValueError:
+        raise ValueError('Sliding window value must be an integer, (e.g. 10, 30, 50, 100)')
+
+    # raise InputError or IndexError for the code before this to ensure if a mistake is made when passing arguments
+    # to script that it wont continue if the mistake will cause the script to fail
+
+    # begin either online sniffing or loading from pcap file
     if args.online and not args.input_file:
         live_capture()
 
-    else:
-        print('Can only specify either online packet sniffing or load packets from file, not both.'
-              'Use --help for further info')
+
 
     # Allow user to decide whether to sniff in real time or load a pcap file
     while 1:
