@@ -3,6 +3,7 @@ import pyshark
 import time
 import statistics
 import argparse
+import os
 from scapy.all import *
 
 
@@ -336,17 +337,21 @@ if __name__ == "__main__":
     # set up cmd line variables for use in script
     # check to make sure online mode and read from file haven't both been set
 
-    if not args.online and not args.input_file:
-        raise IndexError('Must provide either --input_file or --online with command line, use --help for further info.')
+    if args.online and args.input_file:
+        raise IndexError('Must provide either --input_file or --online with command line not both,'
+                         'use --help for further info.')
 
     elif args.input_file and not args.online:
         pcap_file = args.input_file
+        if not os.path.exists(pcap_file):
+            raise FileNotFoundError('No such file exists or directory is not valid.')
+        
     #elif not args.online and not args.input_file:
         #print('Please select either online packet sniffing or load packets from pcap. '
               #'Use --help for further info.')
-    else:
-        print('Can only specify either online packet sniffing or load packets from file, not both. '
-              'Use --help for further info')
+    #else:
+       # print('Can only specify either online packet sniffing or load packets from file, not both. '
+              #'Use --help for further info')
 
     if args.output_file:
         data_file = args.output_file
@@ -354,7 +359,6 @@ if __name__ == "__main__":
     # ensure sliding window value is an integer
     try:
         sw_val = args.sliding_window
-
     except ValueError:
         raise ValueError('Sliding window value must be an integer, (e.g. 10, 30, 50, 100)')
 
@@ -367,49 +371,49 @@ if __name__ == "__main__":
 
 
 
-    # Allow user to decide whether to sniff in real time or load a pcap file
-    while 1:
-        print('1. Sniff packets online \n'
-              '2. Load pcap file ')
-
-        sniff_option = int(input('Select packet sniffing option: '))
-
-        if sniff_option == 1:
-            # Sniff packets in real time
-            live_capture()
-            break
-
-        elif sniff_option == 2:
-
-            # Lookup dict for different pcap files
-            pcap_dict = {'1': 'variable_rate_normal_mon_VP',
-                         '2': 'variable_rate_attack01_mon_VP',
-                         '3': 'variable_rate_attack02_mon_VP',
-                         '4': 'variable_rate_inthemix_mon_VP'}
-
-            # Menu of options for which pcap file to process
-            print('1. variable_rate_normal_mon_VP \n'
-                  '2. variabel_rate_attack01_mon_VP \n'
-                  '3. variable_rate_attack02_mon_VP \n'
-                  '4. variable_rate_inthemix_mon_VP')
-
-            pcap_file_num = str(input('Enter pcap file no. to use: '))
-
-            # Call function to filter all packets.
-            # pkt_list = filter_packets_scapy(pcap_file_num)
-            pkt_list = filter_packets_pyshark(pcap_file_num)
-
-            print('All packets filtered. \n'
-                  'Data is now being extracted from packets. \n')
-
-            # Call function to extract relevant data from packets.
-            # extract_packet_data_scapy(pkt_list)
-            dbm_antsignal, datarate, duration, seq, ttl = extract_packet_data_pyshark(pkt_list)
-
-            initialise_feature_arrays(dbm_antsignal, datarate, duration, seq, ttl)
-
-
-            break
-
-        else:
-            print('Please enter either 1 or 2 from keyboard.')
+    # # Allow user to decide whether to sniff in real time or load a pcap file
+    # while 1:
+    #     print('1. Sniff packets online \n'
+    #           '2. Load pcap file ')
+    #
+    #     sniff_option = int(input('Select packet sniffing option: '))
+    #
+    #     if sniff_option == 1:
+    #         # Sniff packets in real time
+    #         live_capture()
+    #         break
+    #
+    #     elif sniff_option == 2:
+    #
+    #         # Lookup dict for different pcap files
+    #         pcap_dict = {'1': 'variable_rate_normal_mon_VP',
+    #                      '2': 'variable_rate_attack01_mon_VP',
+    #                      '3': 'variable_rate_attack02_mon_VP',
+    #                      '4': 'variable_rate_inthemix_mon_VP'}
+    #
+    #         # Menu of options for which pcap file to process
+    #         print('1. variable_rate_normal_mon_VP \n'
+    #               '2. variabel_rate_attack01_mon_VP \n'
+    #               '3. variable_rate_attack02_mon_VP \n'
+    #               '4. variable_rate_inthemix_mon_VP')
+    #
+    #         pcap_file_num = str(input('Enter pcap file no. to use: '))
+    #
+    #         # Call function to filter all packets.
+    #         # pkt_list = filter_packets_scapy(pcap_file_num)
+    #         pkt_list = filter_packets_pyshark(pcap_file_num)
+    #
+    #         print('All packets filtered. \n'
+    #               'Data is now being extracted from packets. \n')
+    #
+    #         # Call function to extract relevant data from packets.
+    #         # extract_packet_data_scapy(pkt_list)
+    #         dbm_antsignal, datarate, duration, seq, ttl = extract_packet_data_pyshark(pkt_list)
+    #
+    #         initialise_feature_arrays(dbm_antsignal, datarate, duration, seq, ttl)
+    #
+    #
+    #         break
+    #
+    #     else:
+    #         print('Please enter either 1 or 2 from keyboard.')
