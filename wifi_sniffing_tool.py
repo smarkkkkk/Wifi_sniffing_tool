@@ -94,22 +94,20 @@ def extract_packet_data_scapy(filtered_packets):
     np.savetxt('data.csv', pkt_data, fmt='%1.10e', delimiter='\t')
 
 
-def filter_packets_pyshark(pcap_file):
+def filter_packets_pyshark(pcap_fn):
     """
 
     :param pcap_file:
     :return: pkt_list:
     """
-    pcap_fn = 'pcap_files/' + pcap_dict[pcap_file]
-
-    pkt_list = pyshark.FileCapture(pcap_fn, display_filter='(wlan.sa==00:25:9c:cf:8a:73 || wlan.sa==00:25:9c:cf:8a:71)'
-                                                           '&&(wlan.da==40:c3:36:07:d4:bf||wlan.da==ff:ff:ff:ff:ff:ff)'
-                                                           '&&!(wlan.fc.type==0)&&tcp')
-
-    # packet_list = []
-    # packet_list.append(pkt_list)
-    # print(len(packet_list))
-    return pkt_list
+    #pcap_fn = 'pcap_files/' + pcap_dict[pcap_file]
+    try:
+        pkt_list = pyshark.FileCapture(pcap_fn, display_filter='(wlan.sa==00:25:9c:cf:8a:73 || wlan.sa==00:25:9c:cf:8a:71)'
+                                                               '&&(wlan.da==40:c3:36:07:d4:bf||wlan.da==ff:ff:ff:ff:ff:ff)'
+                                                               '&&!(wlan.fc.type==0)&&tcp')
+        return pkt_list
+    except IOError:
+        print('File could not be accessed.')
 
 
 def extract_packet_data_pyshark(filtered_packets):
@@ -344,8 +342,8 @@ if __name__ == "__main__":
     elif args.input_file and not args.online:
         pcap_file = args.input_file
         if not os.path.exists(pcap_file):
-            raise FileNotFoundError('No such file exists or directory is not valid.')
-        
+            raise FileNotFoundError('No such file or directory exists.')
+
     #elif not args.online and not args.input_file:
         #print('Please select either online packet sniffing or load packets from pcap. '
               #'Use --help for further info.')
@@ -362,14 +360,23 @@ if __name__ == "__main__":
     except ValueError:
         raise ValueError('Sliding window value must be an integer, (e.g. 10, 30, 50, 100)')
 
-    # raise InputError or IndexError for the code before this to ensure if a mistake is made when passing arguments
-    # to script that it wont continue if the mistake will cause the script to fail
-
     # begin either online sniffing or loading from pcap file
     if args.online and not args.input_file:
         live_capture()
 
+    elif not args.online:
+        #  Call function to filter all packets.
+        #  pkt_list = filter_packets_scapy(pcap_file_num)
+        pkt_list = filter_packets_pyshark(pcap_file)
 
+        print('All packets filtered. \n'
+              'Data is now being extracted from packets. \n')
+
+        # Call function to extract relevant data from packets.
+        # extract_packet_data_scapy(pkt_list)
+        dbm_antsignal, datarate, duration, seq, ttl = extract_packet_data_pyshark(pkt_list)
+
+        initialise_feature_arrays(dbm_antsignal, datarate, duration, seq, ttl)
 
     # # Allow user to decide whether to sniff in real time or load a pcap file
     # while 1:
