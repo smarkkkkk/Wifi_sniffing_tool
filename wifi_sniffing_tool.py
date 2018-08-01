@@ -1,8 +1,7 @@
 import numpy as np
 import pyshark
-import math
+import time
 import statistics
-import csv
 import argparse
 from scapy.all import *
 
@@ -206,28 +205,40 @@ def initialise_feature_arrays(dbm_antsignal, datarate, duration, seq, ttl):
     sw_seq = seq[0:30]
     sw_ttl = ttl[0:30]
 
-    array_dict = {'sw_dbm_antsignal': sw_dbm_antsignal, 'sw_datarate': sw_datarate,
-                  'sw_duration': sw_duration, 'sw_seq': sw_seq, 'sw_ttl': sw_ttl}
+    array_dict = {'dbm_antsignal': dbm_antsignal, 'datarate': datarate,
+                  'duration': duration, 'seq': seq, 'ttl': ttl}
+
+    sw_dict = {'sw_dbm_antsignal': sw_dbm_antsignal, 'sw_datarate': sw_datarate,
+               'sw_duration': sw_duration, 'sw_seq': sw_seq, 'sw_ttl': sw_ttl}
     ave_dict = {}
 
     # loop over each array and calculate the mean for each array storing it in new dictionary
-    for k, v in array_dict.items():
+    for k, v in sw_dict.items():
         ave_dict[k] = mean(v)
 
     print(ave_dict)
 
+    start_t = time.time()
     # Loop through the arrays, extract the next pacekts one at a time
     # compare features with average values and then add or disregard
     # then update averages
-    for x in range(start=(30+1), stop=len(dbm_antsignal), step=1):
+    start = 30 + 1
+    stop = len(dbm_antsignal)
+    step = 1
+    print(len(dbm_antsignal))
+    for x in range(start, stop, step):
         for key, arrays in array_dict.items():
             for key, ave in ave_dict.items():
-                distance(ave,arrays(x))
+                #print(ave)
+                #print(arrays[x])
+                distance(ave, arrays[x])
+    end_t = time.time()
 
+    print(end_t - start_t)
     return array_dict, ave_dict
 
 
-def analyse_packets(array_dict, ave_dict):
+#def analyse_packets(array_dict, ave_dict):
 
 
 # Maybe put these three functions inside their own class called PacketAnalysis()?
@@ -241,7 +252,6 @@ def mode(data):
 
 def distance(ave, new_val):
     return abs(ave - new_val)
-
 
 
 # Possibly change Statistics to PacketAnalysis, PacketStats ?
@@ -294,25 +304,56 @@ class PacketStatistics():
         pass
 
 
-class SlidingWindow(PacketStatistics):
-    def __int__(self):
-        PacketStatistics.__init__(self)
-
-    def compare_values(self):
-
-    def extract_data(self):
+# class SlidingWindow(PacketStatistics):
+#     def __int__(self):
+#         PacketStatistics.__init__(self)
+#
+#     def compare_values(self):
+#
+#     def extract_data(self):
 
 
 if __name__ == "__main__":
-    # Set up cmd line argument parser
+    # Default settings
+    input_file = '/pcap_files/variable_rate_normal_mon_VP'
+    output_file = 'data.csv'
+    sliding_window = 30
+
+    # Initialise cmd line argument parser
     ap = argparse.ArgumentParser()
-    ap.add_argument("-f", "--file", required=False,
+    ap.add_argument("-f", "--input_file",
                     help="the pcap file to load (include path if not in wd)")
-    ap.add_argument("-o", "--online", required=False,
+    ap.add_argument("-a", "--output_file",
+                    help="specify file to save packet data too")
+    ap.add_argument("-o", "--online",
                     help="initiate online packet sniffing")
-    ap.add_argument("-n", "--number", required=False,
-                    help="the number of packets to include in sliding window, (10, 30, 50, 100)")
-    args = vars(ap.parse_args())
+    ap.add_argument("-s", "--sliding_window", type=int,
+                    help="the number of packets to include in sliding window, (e.g. 10, 30, 50, 100)")
+
+    # read arguments from the command line
+    args = ap.parse_args()
+
+    if args.input_file and not args.online:
+        pcap_file = args.input_file
+    else:
+        print('Can only specify either online packet sniffing or load packets from file, not both. '
+              'Use --help for further info')
+        
+    elif not args.online and not args.input_file:
+        print('Please select either online packet sniffing or load packets from pcap. '
+              'Use --help for further info.')
+
+    if args.output_file:
+        data_file = args.output_file
+    if args.sliding_window:
+        sw_val = args.sliding_window
+
+    if args.online and not args.input_file:
+        live_capture()
+
+    else:
+        print('Can only specify either online packet sniffing or load packets from file, not both.'
+              'Use --help for further info')
 
     # Allow user to decide whether to sniff in real time or load a pcap file
     while 1:
@@ -353,7 +394,9 @@ if __name__ == "__main__":
             # extract_packet_data_scapy(pkt_list)
             dbm_antsignal, datarate, duration, seq, ttl = extract_packet_data_pyshark(pkt_list)
 
-            feature_statistics(dbm_antsignal, datarate, duration, seq, ttl)
+            initialise_feature_arrays(dbm_antsignal, datarate, duration, seq, ttl)
+
+
             break
 
         else:
