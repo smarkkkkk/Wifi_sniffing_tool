@@ -2,13 +2,9 @@ import numpy as np
 import pyshark
 import time
 import argparse
-try:
-    import math
-except ImportError:
-    print('could not import os')
-from scapy.all import *
 import statistics
 import os
+from scapy.all import *
 
 
 def filter_packets_scapy(pcap_file):
@@ -128,13 +124,17 @@ def extract_packet_data_pyshark(filtered_packets):
     seq = []
     ttl = []
 
-    # Extract all data from packets into lists
+    # start_features = time.time()
+    # Extract all data from packets into lists.
+    # This loop is the bottleneck, investigate ways to speed it up. 11.6 seconds to process the normal pcap file
     for pkt in filtered_packets:
         dbm_antsignal.append(int(pkt.radiotap.dbm_antsignal))
         datarate.append(int(pkt.radiotap.datarate))
         duration.append(int(pkt.wlan.duration))
         seq.append(int(pkt.wlan.seq))
         ttl.append(int(pkt.ip.ttl))
+    # end_feature = time.time()
+    # print(end_feature-start_features)
 
     # Convert all packet feature lists to numpy arrays
     dbm_antsignal = np.asarray(dbm_antsignal)
@@ -183,6 +183,7 @@ def feature_statistics(dbm_antsignal, datarate, duration, seq, ttl):
     # Compare new packet with averages
     # Add or disregard new package
 
+    # Extract the first 'sw_size' amount of packets and store in new arrays
     # sw -> sliding window + 'feature name'
     sw_dbm_antsignal = dbm_antsignal[0:30]
     sw_datarate = datarate[0:30]
@@ -200,7 +201,11 @@ def feature_statistics(dbm_antsignal, datarate, duration, seq, ttl):
 
 
 def initialise_feature_arrays(dbm_antsignal, datarate, duration, seq, ttl, sw_size):
+    # Take next packet
+    # Compare new packet with averages
+    # Add or disregard new package
 
+    # Extract the first 'sw_size' amount of packets and store in new arrays
     # sw -> sliding window + '_feature_name'
     sw_dbm_antsignal = dbm_antsignal[0:sw_size]
     sw_datarate = datarate[0:sw_size]
@@ -219,26 +224,28 @@ def initialise_feature_arrays(dbm_antsignal, datarate, duration, seq, ttl, sw_si
     for k, v in sw_dict.items():
         ave_dict[k] = mean(v)
 
-    print(ave_dict)
+    return array_dict, ave_dict, sw_dict
+    # print(ave_dict)
 
-    start_t = time.time()
-    # Loop through the arrays, extract the next pacekts one at a time
-    # compare features with average values and then add or disregard
-    # then update averages
+
+def packet_analysis(array_dict, ave_dict, sw_dict, sw_size):
+
+    # Loop through the arrays, extract the next packets one at a time
+    # compare features with average values and then add or disregard packet
+    # and then update averages
     start = sw_size + 1
+    print('length of dbm_antsignal array {}'.format(len(dbm_antsignal)))
     stop = len(dbm_antsignal)
     step = 1
-    print(len(dbm_antsignal))
+    counter = 0
+
     for x in range(start, stop, step):
         for k_1, arrays in array_dict.items():
             for k_2, ave in ave_dict.items():
-                #  print(ave)
-                #  print(arrays[x])
+                # counter += 1
+                # returns the absolute distance between the average for the feature and the new packet feature
                 distance(ave, arrays[x])
-    end_t = time.time()
-
-    print(end_t - start_t)
-    return array_dict, ave_dict
+    # print(counter)
 
 
 #  def analyse_packets(array_dict, ave_dict):
@@ -317,7 +324,20 @@ class PacketStatistics():
 
 
 if __name__ == "__main__":
-    # start_t = time.time()
+    """
+    Five metrics will be analysed to give evidence of an attack. The metrics identified are: Received Signal Strength 
+    Indication (RSSI), Transmission (or injection) Rate, Frame Sequence number, Duration field (or Network Allocation
+    Vector, NAV) and Time To Live (TTL). 
+    
+    In this program these metrics have the following variable names -->
+    
+    1. dbm_Antsignal
+    2. datarate
+    3. Seq
+    4. duration
+    5. ttl
+    """
+
     # Default settings
     input_file = '/pcap_files/variable_rate_normal_mon_VP'
     output_file = 'data.csv'
@@ -333,7 +353,7 @@ if __name__ == "__main__":
                     help="initiate online packet sniffing")
     ap.add_argument("-s", "--sliding_window",
                     help="the number of packets to include in sliding window, (e.g. 10, 30, 50, 100)")
-    #ap.add_argument()
+
     # read arguments from the command line
     args = ap.parse_args()
 
@@ -372,9 +392,6 @@ if __name__ == "__main__":
     else:
         input_file_FLAG = False
 
-    # end_t = time.time()
-
-    # print(end_t - start_t)
     # begin either online sniffing or loading from pcap file
     try:
         if args.online is True and input_file_FLAG is False:
@@ -396,10 +413,13 @@ if __name__ == "__main__":
 
             # Call function to extract relevant data from packets.
             # extract_packet_data_scapy(pkt_list)
+
             dbm_antsignal, datarate, duration, seq, ttl = extract_packet_data_pyshark(pkt_list)
 
-            initialise_feature_arrays(dbm_antsignal, datarate, duration, seq, ttl, sw_val)
-            
+            array_dict, ave_dict, sw_dict = initialise_feature_arrays(dbm_antsignal, datarate, duration, seq, ttl, sw_val)
+
+            packet_analysis(array_dict, ave_dict, sw_dict, sw_val)
+
         elif args.online is True and input_file_FLAG is True:
             raise IndexError()
         else:
@@ -407,9 +427,9 @@ if __name__ == "__main__":
 
     except FileNotFoundError:
         print('FileNotFoundError: file or directory does not exist.')
-    except IndexError:
-        print('IndexError: must provide either --input_file or --online, not both,'
-              'use --help for further info.')
+    #except IndexError:
+     #   print('IndexError: must provide either --input_file or --online, not both,'
+      #        'use --help for further info.')
     finally:
         print('Exiting program!')
         # sys.exit(1)
