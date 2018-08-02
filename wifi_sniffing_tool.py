@@ -1,10 +1,14 @@
 import numpy as np
 import pyshark
 import time
-import statistics
 import argparse
-import os
+try:
+    import math
+except ImportError:
+    print('could not import os')
 from scapy.all import *
+import statistics
+import os
 
 
 def filter_packets_scapy(pcap_file):
@@ -100,7 +104,6 @@ def filter_packets_pyshark(pcap_fn):
     :param pcap_fn:
     :return: pkt_list:
     """
-    #  pcap_fn = 'pcap_files/' + pcap_dict[pcap_file]
     try:
         pkt_list = pyshark.FileCapture(pcap_fn, display_filter='(wlan.sa==00:25:9c:cf:8a:73 || '
                                                                'wlan.sa==00:25:9c:cf:8a:71) && '
@@ -109,7 +112,7 @@ def filter_packets_pyshark(pcap_fn):
                                                                '(wlan.fc.type==0) && tcp')
         return pkt_list
     except IOError:
-        print('File could not be accessed.')
+        print('IOError: File could not be accessed.')
 
 
 def extract_packet_data_pyshark(filtered_packets):
@@ -280,7 +283,7 @@ class PacketStatistics():
         self.is_not_used()  # removes the 'static' warning from PyCharm
         data = data[0:self.ave_length]  # Step 1 - extracts 30 data values
 
-        return statistics.mean(data)
+        return mean(data)
 
     def mode(self, data):
         """
@@ -291,7 +294,7 @@ class PacketStatistics():
         self.is_not_used()  # removes the 'static' warning from PyCharm
         data = data[0:self.ave_length]
 
-        return statistics.mode(data)
+        return mode(data)
 
     def diff_from_ave(self, ref_val):
         """
@@ -314,10 +317,11 @@ class PacketStatistics():
 
 
 if __name__ == "__main__":
+    # start_t = time.time()
     # Default settings
     input_file = '/pcap_files/variable_rate_normal_mon_VP'
     output_file = 'data.csv'
-    sliding_window = 30
+    sw_val = 30
 
     # Initialise cmd line argument parser
     ap = argparse.ArgumentParser()
@@ -356,46 +360,60 @@ if __name__ == "__main__":
         data_file = args.output_file
 
     # ensure sliding window value is an integer
-    # try:
     if args.sliding_window:
         sw_val = args.sliding_window
-        print(sw_val)
-        print(isinstance(sw_val, int))
+        # print(sw_val)
+        # print(isinstance(sw_val, int))
         if not isinstance(sw_val, int):
-
             raise ValueError('Sliding window value must be an integer, (e.g. 10, 30, 50, 100)')
 
-    #PCAP_FILE = True
+    if args.input_file:
+        input_file_FLAG = True
+    else:
+        input_file_FLAG = False
+
+    # end_t = time.time()
+
+    # print(end_t - start_t)
     # begin either online sniffing or loading from pcap file
     try:
-        if args.online and not args.input_file:
+        if args.online is True and input_file_FLAG is False:
             live_capture()
 
-        elif args.input_file and not args.online:
+        elif input_file_FLAG is True and args.online is False:
             pcap_file = args.input_file
 
-            if not os.path.exists(pcap_file):
-                raise FileNotFoundError('File or directory does not exist.')
+            if os.path.exists(pcap_file) is False:
+                raise FileNotFoundError()
 
+            print('About to start filtering packets...\n')
             #  Call function to filter all packets.
             #  pkt_list = filter_packets_scapy(pcap_file_num)
             pkt_list = filter_packets_pyshark(pcap_file)
 
             print('All packets filtered. \n'
-                  'Data is now being extracted from packets. \n')
+                  'Data is now being extracted from packets... \n')
 
             # Call function to extract relevant data from packets.
             # extract_packet_data_scapy(pkt_list)
             dbm_antsignal, datarate, duration, seq, ttl = extract_packet_data_pyshark(pkt_list)
 
             initialise_feature_arrays(dbm_antsignal, datarate, duration, seq, ttl, sw_val)
+            
+        elif args.online is True and input_file_FLAG is True:
+            raise IndexError()
+        else:
+            print('Invalid flags set on cmd line, use --help for further info')
 
-        elif args.online and args.input_file:
-            raise IndexError('Must provide either --input_file or --online with command line not both,'
-                             'use --help for further info.')
-    except:
-        print('Unexpected error occurred')
-    # # Allow user to decide whether to sniff in real time or load a pcap file
+    except FileNotFoundError:
+        print('FileNotFoundError: file or directory does not exist.')
+    except IndexError:
+        print('IndexError: must provide either --input_file or --online, not both,'
+              'use --help for further info.')
+    finally:
+        print('Exiting program!')
+        # sys.exit(1)
+   # # Allow user to decide whether to sniff in real time or load a pcap file
     # while 1:
     #     print('1. Sniff packets online \n'
     #           '2. Load pcap file ')
