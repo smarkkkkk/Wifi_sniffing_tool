@@ -1,9 +1,4 @@
-import numpy as np
-import pyshark
-import time
-import argparse
-import statistics
-import os
+import pyshark, argparse, statistics, itertools, os, time, numpy as np
 from scapy.all import *
 
 
@@ -124,7 +119,6 @@ def extract_packet_data_pyshark(filtered_packets):
     seq = []
     ttl = []
 
-    # start_features = time.time()
     # Extract all data from packets into lists.
     # This loop is the bottleneck, investigate ways to speed it up. 11.6 seconds to process the normal pcap file
     for pkt in filtered_packets:
@@ -133,8 +127,6 @@ def extract_packet_data_pyshark(filtered_packets):
         duration.append(int(pkt.wlan.duration))
         seq.append(int(pkt.wlan.seq))
         ttl.append(int(pkt.ip.ttl))
-    # end_feature = time.time()
-    # print(end_feature-start_features)
 
     # Convert all packet feature lists to numpy arrays
     dbm_antsignal = np.asarray(dbm_antsignal)
@@ -174,7 +166,6 @@ def live_capture():
 
 
 def feature_statistics(dbm_antsignal, datarate, duration, seq, ttl):
-    stats = PacketStatistics()
 
     # Extract the first 30 packets (or x amount set by user)
     # Store in new arrays
@@ -220,12 +211,14 @@ def initialise_feature_arrays(dbm_antsignal, datarate, duration, seq, ttl, sw_si
                'sw_duration': sw_duration, 'sw_seq': sw_seq, 'sw_ttl': sw_ttl}
     ave_dict = {}
 
-    # loop over each array and calculate the mean for each array storing it in new dictionary
+    # loop over each array and calculate the mean/mode for each array storing it in new dictionary
     for k, v in sw_dict.items():
-        ave_dict[k] = mean(v)
+        if k == 'sw_ttl':
+            ave_dict[k] = mode(v)
+        else:
+            ave_dict[k] = mean(v)
 
     return array_dict, ave_dict, sw_dict
-    # print(ave_dict)
 
 
 def packet_analysis(array_dict, ave_dict, sw_dict, sw_size):
@@ -323,6 +316,15 @@ class PacketStatistics():
 #     def extract_data(self):
 
 
+def metric_combination(select_metrics):
+    numbers = [1, 2, 4, 8, 16]
+
+    # this will return the combination of numbers that sum to select_metrics integer
+    result = [seq for i in range(len(numbers), 0, -1) for seq in itertools.combinations(numbers, i)
+              if sum(seq) == select_metrics]
+    print(result)
+
+
 if __name__ == "__main__":
     """
     Five metrics will be analysed to give evidence of an attack. The metrics identified are: Received Signal Strength 
@@ -331,19 +333,20 @@ if __name__ == "__main__":
     
     In this program these metrics have the following variable names -->
     
-    1. dbm_Antsignal
-    2. datarate
-    3. Seq
-    4. duration
-    5. ttl
+    RSSI --> dbm_Antsignal
+    Rate --> datarate
+    Seq -- > Seq
+    NAV --> duration
+    TTL --> ttl
     """
 
     # Default settings
     input_file = '/pcap_files/variable_rate_normal_mon_VP'
     output_file = 'data.csv'
     sw_val = 30
+    select_metrics = 31
 
-    # Initialise cmd line argument parser
+    # Initialise cmd line argument parser and flags
     ap = argparse.ArgumentParser()
     ap.add_argument("-f", "--input_file",
                     help="the pcap file to load (include path if not in wd)")
@@ -353,6 +356,8 @@ if __name__ == "__main__":
                     help="initiate online packet sniffing")
     ap.add_argument("-s", "--sliding_window",
                     help="the number of packets to include in sliding window, (e.g. 10, 30, 50, 100)")
+    ap.add_argument("-b", "--features", type=int,
+                    help="integer to select which metrics should be used. See \"select_metrics.txt\" for further info.")
 
     # read arguments from the command line
     args = ap.parse_args()
@@ -392,8 +397,19 @@ if __name__ == "__main__":
     else:
         input_file_FLAG = False
 
+    if args.features:
+        select_metrics = args.features
+
+    #metric_combination(32)
+
     # begin either online sniffing or loading from pcap file
     try:
+        if select_metrics > 31:
+            print('--features must be an integer between 1 and 31, see "select_metrics.txt" for help.')
+            sys.exit(1)
+        elif 1 <= select_metrics <= 31:# and select_metrics <= 31:
+            metric_combination(select_metrics)
+            
         if args.online is True and input_file_FLAG is False:
             live_capture()
 
