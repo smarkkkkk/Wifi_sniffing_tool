@@ -1,0 +1,18 @@
+This text file explains the -b, --features, flag for wifi_sniffing_tool.py
+The flag takes an integer and uses it too determine which metrics to analyse. 
+
+| Integer	|  Metrics	|
+|-------------------------------|
+| 1		|  RSSI		|
+| 2		|  Rate		|
+| 4		|  NAV		|
+| 8		|  Seq		|
+| 16 		|  TTL		|
+|-------------------------------|
+
+Examples:
+
+Using -b 2 would specify only Rate to be used as metric when detcting attacks.
+Using -b 24 would specify both Seq and TTL to be used as metrics for detecting attacks.
+Using -b 31 would specify all metrics to be used for detecting attacks.
+
