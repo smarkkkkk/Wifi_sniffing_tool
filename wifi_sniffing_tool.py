@@ -226,10 +226,7 @@ def packet_analysis(array_dict, ave_dict, sw_dict, sw_size):
     # Loop through the arrays, extract the next packets one at a time
     # compare features with average values and then add or disregard packet
     # and then update averages
-    start = sw_size + 1
-    print('length of dbm_antsignal array {}'.format(len(dbm_antsignal)))
-    stop = len(dbm_antsignal)
-    step = 1
+    start, stop, step = sw_size + 1, len(dbm_antsignal), 1
     counter = 0
 
     for x in range(start, stop, step):
@@ -322,7 +319,8 @@ def metric_combination(select_metrics):
     # this will return the combination of numbers that sum to select_metrics integer
     result = [seq for i in range(len(numbers), 0, -1) for seq in itertools.combinations(numbers, i)
               if sum(seq) == select_metrics]
-    print(result)
+    # print(result)
+    return result
 
 
 if __name__ == "__main__":
@@ -381,9 +379,6 @@ if __name__ == "__main__":
        # print('Can only specify either online packet sniffing or load packets from file, not both. '
               #'Use --help for further info')
 
-    if args.output_file:
-        data_file = args.output_file
-
     # ensure sliding window value is an integer
     if args.sliding_window:
         sw_val = args.sliding_window
@@ -392,24 +387,27 @@ if __name__ == "__main__":
         if not isinstance(sw_val, int):
             raise ValueError('Sliding window value must be an integer, (e.g. 10, 30, 50, 100)')
 
+    # assign cmd line arguments to program variables
+    if args.output_file:
+        data_file = args.output_file
     if args.input_file:
         input_file_FLAG = True
     else:
         input_file_FLAG = False
-
     if args.features:
         select_metrics = args.features
 
-    #metric_combination(32)
-
     # begin either online sniffing or loading from pcap file
     try:
-        if select_metrics > 31:
+        if 1 <= select_metrics <= 31:
+            result = metric_combination(select_metrics)
+            if len(result) < 1:
+                print('Invalid integer entered, see "select_metrics.txt" for help.')
+                sys.exit(1)
+        elif select_metrics > 31:
             print('--features must be an integer between 1 and 31, see "select_metrics.txt" for help.')
             sys.exit(1)
-        elif 1 <= select_metrics <= 31:# and select_metrics <= 31:
-            metric_combination(select_metrics)
-            
+
         if args.online is True and input_file_FLAG is False:
             live_capture()
 
@@ -429,7 +427,6 @@ if __name__ == "__main__":
 
             # Call function to extract relevant data from packets.
             # extract_packet_data_scapy(pkt_list)
-
             dbm_antsignal, datarate, duration, seq, ttl = extract_packet_data_pyshark(pkt_list)
 
             array_dict, ave_dict, sw_dict = initialise_feature_arrays(dbm_antsignal, datarate, duration, seq, ttl, sw_val)
