@@ -79,30 +79,7 @@ def live_capture():
         print(pkt.radiotap.dbm_antsignal, pkt.radiotap.datarate, pkt.wlan.duration, pkt.wlan.seq, pkt.ip.ttl)
 
 
-def feature_statistics(dbm_antsignal, datarate, duration, seq, ttl):
-
-    # Extract the first 30 packets (or x amount set by user)
-    # Store in new arrays
-    # Take and store averages for each new array
-    # Take next packet
-    # Compare new packet with averages
-    # Add or disregard new package
-
-    # Extract the first 'sw_size' amount of packets and store in new arrays
-    # sw -> sliding window + 'feature name'
-    sw_dbm_antsignal = dbm_antsignal[0:30]
-    sw_datarate = datarate[0:30]
-    sw_duration = duration[0:30]
-    sw_seq = seq[0:30]
-    sw_ttl = ttl[0:30]
-
-    array_dict = {'sw_dbm_antsignal':sw_dbm_antsignal, 'sw_datarate':sw_datarate,
-                  'sw_duration':sw_duration, 'sw_seq':sw_seq, 'sw_ttl':sw_ttl }
-    ave_dict = {}
-
-    # loop over each array and calculate the mean for each array storing it in new dictionary
-    for k, v in array_dict.items():
-        ave_dict[k] = mean(v)
+# def feature_statistics(dbm_antsignal, datarate, duration, seq, ttl):
 
 
 def initialise_feature_arrays(dbm_antsignal, datarate, duration, seq, ttl, sw_size):
@@ -187,7 +164,7 @@ class AutoBPA():
     def normal(self):
 
     def attack(self):
-        
+
     def uncertainty(self):
 
 
