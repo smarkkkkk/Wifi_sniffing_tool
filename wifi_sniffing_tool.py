@@ -2,12 +2,6 @@ import pyshark, argparse, statistics, itertools, os, time, numpy as np
 from scapy.all import *
 
 
-
-
-
-
-
-
 def filter_packets_pyshark(pcap_fn):
     """
 
