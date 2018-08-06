@@ -1,4 +1,5 @@
-import pyshark, argparse, statistics, itertools, os, time, numpy as np
+import pyshark, argparse, statistics, itertools, os, time
+import numpy as np
 from scapy.all import *
 
 
