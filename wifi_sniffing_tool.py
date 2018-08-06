@@ -217,15 +217,6 @@ class PacketStatistics():
         pass
 
 
-# class SlidingWindow(PacketStatistics):
-#     def __int__(self):
-#         PacketStatistics.__init__(self)
-#
-#     def compare_values(self):
-#
-#     def extract_data(self):
-
-
 def metric_combination(select_metrics):
     numbers = [1, 2, 4, 8, 16]
 
