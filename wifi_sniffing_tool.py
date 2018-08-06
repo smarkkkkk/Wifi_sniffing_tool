@@ -2,48 +2,7 @@ import pyshark, argparse, statistics, itertools, os, time, numpy as np
 from scapy.all import *
 
 
-def filter_packets_scapy(pcap_file):
-    """
-    This function loads a pcap file and filters all the packets
 
-    :param: user selected pacp file number [pcap_file]
-    :return: list of filtered packets [pkt_list]
-    """
-
-    # Read packets
-    pcap_fn = 'pcap_files/'+pcap_dict[pcap_file]
-    packets = rdpcap(pcap_fn)
-
-    print('pcap file read successfully \n')
-
-    pkt_count = 0
-    management_count = 0
-    src_count = 0
-    dst_count = 0
-    tcp_count = 0
-    pkt_list = []
-
-    # Implement filter
-    for pkt in packets:
-        if not pkt.type == 0:  # Removes management packets
-            management_count += 1
-            if pkt.haslayer(TCP):  # Only process TCP packets
-                tcp_count += 1
-                if pkt.addr2 == "00:25:9c:cf:8a:73" or pkt.addr2 == "00:25:9c:cf:8a:71":  # Souce MAC
-                    src_count += 1
-                    if pkt.addr3 == "00:25:9c:cf:8a:73" or pkt.addr3 == "00:25:9c:cf:8a:71":  # Destination MAC
-                        dst_count += 1
-                        pkt_count += 1
-                        pkt_list.append(pkt)
-
-    print('Number of packets found for each filter stage: \n'
-          'Non management packets = {} \n'
-          'TCP packets = {}\n'
-          'Correct source address = {}\n'
-          'Correct destination address = {}\n'
-          'Final number of packets = {}\n'.format(management_count, tcp_count, src_count, dst_count, pkt_count))
-
-    return pkt_list
 
 
 def extract_packet_data_scapy(filtered_packets):
