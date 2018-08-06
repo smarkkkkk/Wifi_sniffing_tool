@@ -5,47 +5,7 @@ from scapy.all import *
 
 
 
-def extract_packet_data_scapy(filtered_packets):
-    """
-    This function extracts data from the sniffed and filtered packets
-    such as rssi, datarate, duration, antenna signal, ttl and seq
 
-    :param: filtered_packets:
-    :return:
-    """
-    pkt_data = np.zeros((len(filtered_packets), 4))
-    pkt_incr = 0
-
-    for pkt in filtered_packets:
-        #off, radiotap = r.radiotap_parse(pkt)
-        #print(radiotap)
-        #print(pkt[0].show())
-        #print(pkt[IP].ttl)
-        #print(pkt[TCP].seq)
-        #print(pkt.load)
-        #print(codecs.getencoder(pkt.load))
-        #print(pkt[RadioTap].present)
-        #print(pkt[RadioTap].notdecoded)
-        #print(pkt.radiotap.datarate)
-        #print(ord(pkt.notdecoded[-2:-1]))
-        #print(ord(pkt.notdecoded[-3:-2]))
-        #print(ord(pkt.notdecoded[-5:-4]))
-
-        try:
-            extra = pkt.notdecoded
-            rssi = -(256 - ord(extra[-4:-3]))  # ord returns an integer representing the Unicode code
-        except:
-            rssi = -100
-
-        pkt_data[pkt_incr][0] = pkt_incr
-        pkt_data[pkt_incr][1] = rssi  # rssi value is taken from unproven formula
-        pkt_data[pkt_incr][2] = pkt[IP].ttl  # this value seems correct
-        pkt_data[pkt_incr][3] = pkt[TCP].seq  # This is incorrect sequence
-
-        pkt_incr += 1
-
-    # pkt_data = pkt_data.astype(int)
-    np.savetxt('data.csv', pkt_data, fmt='%1.10e', delimiter='\t')
 
 
 def filter_packets_pyshark(pcap_fn):
