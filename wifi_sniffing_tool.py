@@ -150,19 +150,6 @@ def packet_analysis(array_dict, ave_dict, sw_dict, sw_size):
     # print(counter)
 
 
-# Maybe put these three functions inside their own class called PacketAnalysis()?
-def mean(data):
-    return statistics.mean(data)
-
-
-def frequency(data):
-    return statistics.mode(data)
-
-
-def distance(ave, new_val):
-    return abs(ave - new_val)
-
-
 def metric_combination(select_metrics):
     numbers = [1, 2, 4, 8, 16]
 
@@ -171,6 +158,42 @@ def metric_combination(select_metrics):
               if sum(seq) == select_metrics]
     # print(result)
     return result
+
+
+class PacketStatistics:
+
+    @staticmethod
+    def mean(self, data):
+        return statistics.mean(data)
+
+    @staticmethod
+    def frequency(self, data):
+        return statistics.mode(data)
+
+    @staticmethod
+    def distance(self, ave, new_val):
+        return abs(ave - new_val)
+
+
+class AutoBPA():
+    alf = 0
+    def __init__(self, data_set):
+        self.initial_data = data_set
+
+    def alpha(self, data):
+        F = statistics.mode(self.initial_data)
+        a = math.degrees(math.acos(F / (math.sqrt(max(data) + (F^2)) )))
+
+    def normal(self):
+
+    def attack(self):
+        
+    def uncertainty(self):
+
+
+
+
+
 
 
 if __name__ == "__main__":
