@@ -168,63 +168,6 @@ def distance(ave, new_val):
     return abs(ave - new_val)
 
 
-# Possibly change Statistics to PacketAnalysis, PacketStats ?
-class PacketStatistics():
-    ave_length = 0
-    # Not sure what needs to go in __init__ yet? Probably not mean and mode? Mean and mode need to be calculated
-    # and then fed in as reference values for the new packets to be compared to. Maybe separate class for mean and mode
-    # calculations and separate class for comparing new packet values to the mean and mode reference values.
-
-    # def __init__(self, rssi_mean, rate_mean, duration_mean, seq_mean, ttl_mean):
-    #     # Some of these will become mode rather than mean
-    #     # These are all instance variables?
-    #     self._rssi_mean = rssi_mean
-    #     self._rate_mean = rate_mean
-    #     self._duration_mean = duration_mean
-    #     self._seq_mean = seq_mean
-    #     self._ttl_mean = ttl_mean
-
-    # @staticmethod  # will remove the 'static' warning
-    def mean(self, data):  # This is an instance method?
-        """
-        Returns the mean of the numbers
-        :param data
-        :return:
-        """
-        self.is_not_used()  # removes the 'static' warning from PyCharm
-        data = data[0:self.ave_length]  # Step 1 - extracts 30 data values
-
-        return mean(data)
-
-    def mode(self, data):
-        """
-        Returns the mode of the numbers
-        :param nums:
-        :return:
-        """
-        self.is_not_used()  # removes the 'static' warning from PyCharm
-        data = data[0:self.ave_length]
-
-        return mode(data)
-
-    def diff_from_ave(self, ref_val):
-        """
-
-        :param ref_val:
-        :return:
-        """
-
-    def is_not_used(self):
-        pass
-
-
-# class SlidingWindow(PacketStatistics):
-#     def __int__(self):
-#         PacketStatistics.__init__(self)
-#
-#     def compare_values(self):
-#
-#     def extract_data(self):
 
 
 def metric_combination(select_metrics):
