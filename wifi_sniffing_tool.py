@@ -106,10 +106,8 @@ def feature_statistics(dbm_antsignal, datarate, duration, seq, ttl):
 
 
 def initialise_feature_arrays(dbm_antsignal, datarate, duration, seq, ttl, sw_size):
-    # Take next packet
-    # Compare new packet with averages
-    # Add or disregard new package
-
+    """
+    """
     # Extract the first 'sw_size' amount of packets and store in new arrays
     # sw -> sliding window + '_feature_name'
     sw_dbm_antsignal = dbm_antsignal[0:sw_size]
@@ -125,10 +123,10 @@ def initialise_feature_arrays(dbm_antsignal, datarate, duration, seq, ttl, sw_si
                'sw_duration': sw_duration, 'sw_seq': sw_seq, 'sw_ttl': sw_ttl}
     ave_dict = {}
 
-    # loop over each array and calculate the mean/mode for each array storing it in new dictionary
+    # loop over each array and calculate the mean/frequency for each array storing it in new dictionary
     for k, v in sw_dict.items():
         if k == 'sw_ttl':
-            ave_dict[k] = mode(v)
+            ave_dict[k] = frequency(v)
         else:
             ave_dict[k] = mean(v)
 
@@ -152,22 +150,17 @@ def packet_analysis(array_dict, ave_dict, sw_dict, sw_size):
     # print(counter)
 
 
-#  def analyse_packets(array_dict, ave_dict):
-
-
 # Maybe put these three functions inside their own class called PacketAnalysis()?
 def mean(data):
     return statistics.mean(data)
 
 
-def mode(data):
+def frequency(data):
     return statistics.mode(data)
 
 
 def distance(ave, new_val):
     return abs(ave - new_val)
-
-
 
 
 def metric_combination(select_metrics):
