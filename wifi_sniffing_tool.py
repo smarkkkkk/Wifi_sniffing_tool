@@ -1,6 +1,8 @@
 import pyshark, argparse, statistics, itertools, os, time
 import numpy as np
 from scapy.all import *
+from autobpa import AutoBPA
+from packetstatistics import PacketStatistics
 
 
 def filter_packets_pyshark(pcap_fn):
@@ -81,7 +83,7 @@ def live_capture():
 
 # def feature_statistics(dbm_antsignal, datarate, duration, seq, ttl):
 
-
+# conside changing to metric analysis
 def initialise_feature_arrays(dbm_antsignal, datarate, duration, seq, ttl, sw_size):
     """
     """
@@ -135,42 +137,6 @@ def metric_combination(select_metrics):
               if sum(seq) == select_metrics]
     # print(result)
     return result
-
-
-class PacketStatistics:
-
-    @staticmethod
-    def mean(self, data):
-        return statistics.mean(data)
-
-    @staticmethod
-    def frequency(self, data):
-        return statistics.mode(data)
-
-    @staticmethod
-    def distance(self, ave, new_val):
-        return abs(ave - new_val)
-
-
-class AutoBPA():
-    alf = 0
-    def __init__(self, data_set):
-        self.initial_data = data_set
-
-    def alpha(self, data):
-        F = statistics.mode(self.initial_data)
-        a = math.degrees(math.acos(F / (math.sqrt(max(data) + (F^2)) )))
-
-    def normal(self):
-
-    def attack(self):
-
-    def uncertainty(self):
-
-
-
-
-
 
 
 if __name__ == "__main__":
