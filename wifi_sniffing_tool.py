@@ -5,6 +5,7 @@ from autobpa import AutoBPA
 from packetstatistics import PacketStatistics
 
 
+# potentially add all the pyshark functions into a class, filter, extract and live capture?
 def filter_packets_pyshark(pcap_fn):
     """
 
@@ -102,18 +103,19 @@ def initialise_feature_arrays(dbm_antsignal, datarate, duration, seq, ttl, sw_si
                'sw_duration': sw_duration, 'sw_seq': sw_seq, 'sw_ttl': sw_ttl}
     ave_dict = {}
 
+    stats_1 = PacketStatistics
     # loop over each array and calculate the mean/frequency for each array storing it in new dictionary
     for k, v in sw_dict.items():
         if k == 'sw_ttl':
-            ave_dict[k] = frequency(v)
+            ave_dict[k] = stats_1.frequency(v)
         else:
-            ave_dict[k] = mean(v)
+            ave_dict[k] = stats_1.mean(v)
 
     return array_dict, ave_dict, sw_dict
 
 
 def packet_analysis(array_dict, ave_dict, sw_dict, sw_size):
-
+    stats_2 = PacketStatistics
     # Loop through the arrays, extract the next packets one at a time
     # compare features with average values and then add or disregard packet
     # and then update averages
@@ -125,7 +127,7 @@ def packet_analysis(array_dict, ave_dict, sw_dict, sw_size):
             for k_2, ave in ave_dict.items():
                 # counter += 1
                 # returns the absolute distance between the average for the feature and the new packet feature
-                distance(ave, arrays[x])
+                stats_2.distance(ave, arrays[x])
     # print(counter)
 
 
@@ -135,7 +137,7 @@ def metric_combination(select_metrics):
     # this will return the combination of numbers that sum to select_metrics integer
     result = [seq for i in range(len(numbers), 0, -1) for seq in itertools.combinations(numbers, i)
               if sum(seq) == select_metrics]
-    # print(result)
+
     return result
 
 
@@ -176,25 +178,6 @@ if __name__ == "__main__":
     # read arguments from the command line
     args = ap.parse_args()
 
-    # set up cmd line variables for use in script
-    # check to make sure online mode and read from file haven't both been set
-
-    # if args.online and args.input_file:
-    #     raise IndexError('Must provide either --input_file or --online with command line not both,'
-    #                      'use --help for further info.')
-
-    # elif args.input_file and not args.online:
-    #     pcap_file = args.input_file
-    #     if not os.path.exists(pcap_file):
-    #         raise FileNotFoundError('No such file or directory exists.')
-
-    #elif not args.online and not args.input_file:
-        #print('Please select either online packet sniffing or load packets from pcap. '
-              #'Use --help for further info.')
-    #else:
-       # print('Can only specify either online packet sniffing or load packets from file, not both. '
-              #'Use --help for further info')
-
     # ensure sliding window value is an integer
     if args.sliding_window:
         sw_val = args.sliding_window
@@ -217,12 +200,8 @@ if __name__ == "__main__":
     try:
         if 1 <= select_metrics <= 31:
             result = metric_combination(select_metrics)
-            if len(result) < 1:
-                print('Invalid integer entered, see "select_metrics.txt" for help.')
-                sys.exit(1)
-        elif select_metrics > 31:
-            print('--features must be an integer between 1 and 31, see "select_metrics.txt" for help.')
-            sys.exit(1)
+        else:
+            raise ValueError
 
         if args.online is True and input_file_FLAG is False:
             live_capture()
@@ -235,19 +214,18 @@ if __name__ == "__main__":
 
             print('About to start filtering packets...\n')
             #  Call function to filter all packets.
-            #  pkt_list = filter_packets_scapy(pcap_file_num)
             pkt_list = filter_packets_pyshark(pcap_file)
 
             print('All packets filtered. \n'
                   'Data is now being extracted from packets... \n')
 
             # Call function to extract relevant data from packets.
-            # extract_packet_data_scapy(pkt_list)
             dbm_antsignal, datarate, duration, seq, ttl = extract_packet_data_pyshark(pkt_list)
 
             array_dict, ave_dict, sw_dict = initialise_feature_arrays(dbm_antsignal, datarate, duration, seq, ttl, sw_val)
 
             packet_analysis(array_dict, ave_dict, sw_dict, sw_val)
+            print('Program finished without error.\n')
 
         elif args.online is True and input_file_FLAG is True:
             raise IndexError()
@@ -256,55 +234,8 @@ if __name__ == "__main__":
 
     except FileNotFoundError:
         print('FileNotFoundError: file or directory does not exist.')
-    #except IndexError:
-     #   print('IndexError: must provide either --input_file or --online, not both,'
-      #        'use --help for further info.')
+    except ValueError:
+        print('ValueError: --features must be an integer between 1 and 31, see "select_metrics.txt" for help.')
+
     finally:
         print('Exiting program!')
-        # sys.exit(1)
-   # # Allow user to decide whether to sniff in real time or load a pcap file
-    # while 1:
-    #     print('1. Sniff packets online \n'
-    #           '2. Load pcap file ')
-    #
-    #     sniff_option = int(input('Select packet sniffing option: '))
-    #
-    #     if sniff_option == 1:
-    #         # Sniff packets in real time
-    #         live_capture()
-    #         break
-    #
-    #     elif sniff_option == 2:
-    #
-    #         # Lookup dict for different pcap files
-    #         pcap_dict = {'1': 'variable_rate_normal_mon_VP',
-    #                      '2': 'variable_rate_attack01_mon_VP',
-    #                      '3': 'variable_rate_attack02_mon_VP',
-    #                      '4': 'variable_rate_inthemix_mon_VP'}
-    #
-    #         # Menu of options for which pcap file to process
-    #         print('1. variable_rate_normal_mon_VP \n'
-    #               '2. variabel_rate_attack01_mon_VP \n'
-    #               '3. variable_rate_attack02_mon_VP \n'
-    #               '4. variable_rate_inthemix_mon_VP')
-    #
-    #         pcap_file_num = str(input('Enter pcap file no. to use: '))
-    #
-    #         # Call function to filter all packets.
-    #         # pkt_list = filter_packets_scapy(pcap_file_num)
-    #         pkt_list = filter_packets_pyshark(pcap_file_num)
-    #
-    #         print('All packets filtered. \n'
-    #               'Data is now being extracted from packets. \n')
-    #
-    #         # Call function to extract relevant data from packets.
-    #         # extract_packet_data_scapy(pkt_list)
-    #         dbm_antsignal, datarate, duration, seq, ttl = extract_packet_data_pyshark(pkt_list)
-    #
-    #         initialise_feature_arrays(dbm_antsignal, datarate, duration, seq, ttl)
-    #
-    #
-    #         break
-    #
-    #     else:
-    #         print('Please enter either 1 or 2 from keyboard.')
