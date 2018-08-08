@@ -1,5 +1,6 @@
 import pyshark, argparse, statistics, itertools, os, time
 import numpy as np
+import traceback
 from scapy.all import *
 from autobpa import AutoBPA
 from packetstatistics import PacketStatistics
@@ -143,7 +144,7 @@ def metric_combination(select_metrics):
 
 if __name__ == "__main__":
     """
-    Five metrics will be analysed to give evidence of an attack. The metrics identified are: Received Signal Strength 
+    Five metrics will be collated to give evidence of an attack. The metrics identified are: Received Signal Strength 
     Indication (RSSI), Transmission (or injection) Rate, Frame Sequence number, Duration field (or Network Allocation
     Vector, NAV) and Time To Live (TTL). 
     
@@ -222,7 +223,8 @@ if __name__ == "__main__":
             # Call function to extract relevant data from packets.
             dbm_antsignal, datarate, duration, seq, ttl = extract_packet_data_pyshark(pkt_list)
 
-            array_dict, ave_dict, sw_dict = initialise_feature_arrays(dbm_antsignal, datarate, duration, seq, ttl, sw_val)
+            array_dict, ave_dict, sw_dict = initialise_feature_arrays(dbm_antsignal, datarate,
+                                                                      duration, seq, ttl, sw_val)
 
             packet_analysis(array_dict, ave_dict, sw_dict, sw_val)
             print('Program finished without error.\n')
@@ -230,12 +232,14 @@ if __name__ == "__main__":
         elif args.online is True and input_file_FLAG is True:
             raise IndexError()
         else:
-            print('Invalid flags set on cmd line, use --help for further info')
+            print('Unknown error. Check cmd line flags, use --help for further info or select_metrics.txt')
 
     except FileNotFoundError:
         print('FileNotFoundError: file or directory does not exist.')
     except ValueError:
         print('ValueError: --features must be an integer between 1 and 31, see "select_metrics.txt" for help.')
+    except:
+        print(traceback.format_exc())
 
     finally:
         print('Exiting program!')
