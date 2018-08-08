@@ -1,6 +1,6 @@
 
 pcap_files/
 #.~lock.data.csv#
-
+__pycache__/
 #.idea/
 .*
