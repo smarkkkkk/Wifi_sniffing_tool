@@ -9,13 +9,18 @@ class PacketStatistics:
     # and quartile values are not required
     # when initiating the class
 
-    def __init__(self, sw, median, lower_quart, upper_quart, inter_quart_range):
-        self._sw = sw
-        self._median = median
-        self._lower_quart = lower_quart
-        self._upper_quart = upper_quart
-        self._inter_quart = inter_quart_range
+    # def __init__(self, sw, median, lower_quart, upper_quart, inter_quart_range):
+    def __init__(self, **kwargs):
+        # These are object variables, they aren't initialised until after the object is defined.
+        # Use kwargs so they don't have to be initialised in the correct order.
+        # Set to default to 0 if they aren't set in the class object?
+        self._sw = kwargs['sw'] if 'sw' in kwargs else 0
+        self._median = kwargs['median'] if 'median' in kwargs else 0
+        self._lower_quart = kwargs['lower_quart'] if 'lower_quart' in kwargs else 0
+        self._upper_quart = kwargs['upper_quart'] if 'upper_quart' in kwargs else 0
+        self._inter_quart = kwargs['inter_quart_range'] if 'inter_quart_range' in kwargs else 0
 
+    # These functions are called methods in Python classes
     @staticmethod
     def mean(data):
         return statistics.mean(data)
