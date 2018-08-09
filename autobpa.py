@@ -10,6 +10,8 @@ class AutoBPA(PacketStatistics):
     # number of key, value pairs. No default values are set in Statistics class
     def __init__(self, normal_bpa, attack_bpa, uncertainty_bpa, **kwargs):
         super().__init__(**kwargs)
+        #if 'data' in kwargs: self._data = kwargs['data']
+
         self._normal_bpa = normal_bpa
         self._attack_bpa = attack_bpa
         self._uncertainty_bpa = uncertainty_bpa
@@ -22,23 +24,41 @@ class AutoBPA(PacketStatistics):
     def normal(self, value):
         # This will use quartiles from a box and whisker plot in PacketStatistics
         # to assign a BPA for normal based on the metric value
-        min = self._lower_quart - (1.5 * self._inter_quart_range)
-        max = self._upper_quart + (1.5 * self._inter_quart_range)
+        min_val = self._lower_quart - (1.5 * self._inter_quart_range)
+        max_val = self._upper_quart + (1.5 * self._inter_quart_range)
 
         if self._lower_quart < value < self._upper_quart:
             self._normal_bpa = 0.4
-        elif min < value < self._lower_quart or self._upper_quart < value < max:
+        elif min_val < value < self._lower_quart or self._upper_quart < value < max_val:
                 self._normal_bpa = 0.3
         else:
-            self._normal_bpa = 0.75
+            self._normal_bpa = 0.15
 
         return self._normal_bpa
 
-
-    #def attack(self):
+    def attack(self):
         # Euclidean distance of current value from reference point and reference to max value
-    #def uncertainty(self):
+        self._attack_bpa = (self._dist_mean * 0.5) / self._dist_maxval
+
+        return self._attack_bpa
+
+    def uncertainty(self):
         # Min of N and A divided by Max of N and A
+        if self._normal_bpa > self._attack_bpa:
+            min_bpa = self._attack_bpa
+            max_bpa = self._normal_bpa
+        elif self._normal_bpa < self._attack_bpa:
+            min_bpa = self._normal_bpa
+            max_bpa = self._attack_bpa
+        else:
+            min_bpa, max_bpa = 0.5, 0.5
+
+        self._uncertainty_bpa = min_bpa / max_bpa
+
+        return self._uncertainty_bpa
+
+    # def adjustment_factor():
+
 
 
 
