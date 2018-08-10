@@ -5,6 +5,7 @@ from scapy.all import *
 from autobpa import AutoBPA
 from packetstatistics import PacketStatistics
 from select_metrics import SelectMetrics
+import feature_analysis
 
 
 # potentially add all the pyshark functions into a class, filter, extract and live capture?
@@ -82,9 +83,6 @@ def live_capture():
 
     for pkt in capture.sniff_continuously(packet_count=200):
         print(pkt.radiotap.dbm_antsignal, pkt.radiotap.datarate, pkt.wlan.duration, pkt.wlan.seq, pkt.ip.ttl)
-
-
-
 
 
 if __name__ == "__main__":
@@ -173,10 +171,12 @@ if __name__ == "__main__":
             # Call function to extract relevant data from packets.
             dbm_antsignal, datarate, duration, seq, ttl = extract_packet_data_pyshark(pkt_list)
 
-            array_dict, ave_dict, sw_dict = initialise_feature_arrays(dbm_antsignal, datarate,
-                                                                      duration, seq, ttl, sw_val)
+            feature_analysis.metric_analysis(dbm_antsignal, datarate, duration, seq, ttl, sw_val)
 
-            packet_analysis(array_dict, ave_dict, sw_dict, sw_val)
+            # array_dict, ave_dict, sw_dict = initialise_feature_arrays(dbm_antsignal, datarate,
+            #                                                           duration, seq, ttl, sw_val)
+            #
+            # packet_analysis(array_dict, ave_dict, sw_dict, sw_val)
             print('Program finished without error.\n')
 
         elif args.online is True and input_file_FLAG is True:
