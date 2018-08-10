@@ -1,4 +1,3 @@
-import numpy as np
 from packetstatistics import PacketStatistics
 
 
@@ -8,13 +7,14 @@ class AutoBPA(PacketStatistics):
     # Putting new variables before kwargs seems to be allowed.
     # **kwargs is a dictionary of keyword arguments that can take on any
     # number of key, value pairs. No default values are set in Statistics class
-    def __init__(self, normal_bpa, attack_bpa, uncertainty_bpa, **kwargs):
+    def __init__(self, normal_bpa, attack_bpa, uncertainty_bpa, adjustment_factor, **kwargs):
         super().__init__(**kwargs)
-        #if 'data' in kwargs: self._data = kwargs['data']
+        # if 'data' in kwargs: self._data = kwargs['data']
 
         self._normal_bpa = normal_bpa
         self._attack_bpa = attack_bpa
         self._uncertainty_bpa = uncertainty_bpa
+        self._adjust_factor = adjustment_factor
 
     # alpha is not needed for IEEE journal N, A, U calculations
     # def alpha(self, data):
@@ -57,7 +57,11 @@ class AutoBPA(PacketStatistics):
 
         return self._uncertainty_bpa
 
-    # def adjustment_factor():
+    def adjustment_factor(self):
+        # Calculate the adjustment factor to be applied to each bpa
+        self._adjust_factor = (self._normal_bpa + self._attack_bpa + self._uncertainty_bpa) / 3
+
+        return self._adjust_factor
 
 
 
