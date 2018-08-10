@@ -3,7 +3,7 @@ import itertools
 
 class SelectMetrics:
 
-    def __init__(self, metric_val=31):
+    def __init__(self, metric_val):
         self._metric_val = metric_val
 
     # Function will validate the inputted metric value
