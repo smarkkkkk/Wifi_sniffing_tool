@@ -26,30 +26,28 @@ class PacketStatistics:
         if 'inter_quart_range' in kwargs: self._inter_quart_range = kwargs['inter_quart_range']
 
     # These functions are called methods in Python classes
-    #@staticmethod
     def mean(self):
         self._mean = statistics.mean(self._data)
+        return self._mean
 
-    #@staticmethod
+    # Frequency is mode in this program
     def frequency(self):
         return statistics.mode(self._data)
 
     def median(self):
         self._median = statistics.median(self._data)
 
-    #@staticmethod
     def distance(self, new_val):
         self._dist_mean = abs(self._mean - new_val)
         self._dist_maxval = abs(max(self._data) - new_val)
-        #return abs(ave - new_val)
 
-    def box_plot(self, data):
-        # produces the quartiles and median, stores them in self.variable_name
+    def box_plot(self):
+        # produces the quartiles and stores them in self.variable_name
         # autoBPA will inherit from the statistics class and therefore will have access to
-        # the quartile values through the self.__init__ inheritance thing. AutoBPA will use the current packet and
-        # self. variables to determine the probability assignment.
+        # the quartile values through the self.__init__ inheritance thing. AutoBPA will use
+        # the current packet and self. variables to determine the probability assignment.
 
-        sorted_data = np.sort(data)
+        sorted_data = np.sort(self._data)
         self._lower_quart = sorted_data[int((self._sw + 1) / 4)]
         self._upper_quart = sorted_data[int(3 * ((self._sw + 1) / 4))]
         self._inter_quart_range = int(self._upper_quart - self._lower_quart)
