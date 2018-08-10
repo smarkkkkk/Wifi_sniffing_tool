@@ -4,6 +4,7 @@ import traceback
 from scapy.all import *
 from autobpa import AutoBPA
 from packetstatistics import PacketStatistics
+from select_metrics import SelectMetrics
 
 
 # potentially add all the pyshark functions into a class, filter, extract and live capture?
@@ -83,63 +84,7 @@ def live_capture():
         print(pkt.radiotap.dbm_antsignal, pkt.radiotap.datarate, pkt.wlan.duration, pkt.wlan.seq, pkt.ip.ttl)
 
 
-# def feature_statistics(dbm_antsignal, datarate, duration, seq, ttl):
 
-# conside changing to metric analysis
-def initialise_feature_arrays(dbm_antsignal, datarate, duration, seq, ttl, sw_size):
-    """
-    """
-    # Extract the first 'sw_size' amount of packets and store in new arrays
-    # sw -> sliding window + '_feature_name'
-    sw_dbm_antsignal = dbm_antsignal[0:sw_size]
-    sw_datarate = datarate[0:sw_size]
-    sw_duration = duration[0:sw_size]
-    sw_seq = seq[0:sw_size]
-    sw_ttl = ttl[0:sw_size]
-
-    array_dict = {'dbm_antsignal': dbm_antsignal, 'datarate': datarate,
-                  'duration': duration, 'seq': seq, 'ttl': ttl}
-
-    sw_dict = {'sw_dbm_antsignal': sw_dbm_antsignal, 'sw_datarate': sw_datarate,
-               'sw_duration': sw_duration, 'sw_seq': sw_seq, 'sw_ttl': sw_ttl}
-    ave_dict = {}
-
-    stats_1 = PacketStatistics
-    # loop over each array and calculate the mean/frequency for each array storing it in new dictionary
-    for k, v in sw_dict.items():
-        if k == 'sw_ttl':
-            ave_dict[k] = stats_1.frequency(v)
-        else:
-            ave_dict[k] = stats_1.mean(v)
-
-    return array_dict, ave_dict, sw_dict
-
-
-def packet_analysis(array_dict, ave_dict, sw_dict, sw_size):
-    stats_2 = PacketStatistics
-    # Loop through the arrays, extract the next packets one at a time
-    # compare features with average values and then add or disregard packet
-    # and then update averages
-    start, stop, step = sw_size + 1, len(dbm_antsignal), 1
-    counter = 0
-
-    for x in range(start, stop, step):
-        for k_1, arrays in array_dict.items():
-            for k_2, ave in ave_dict.items():
-                # counter += 1
-                # returns the absolute distance between the average for the feature and the new packet feature
-                stats_2.distance(ave, arrays[x])
-    # print(counter)
-
-
-def metric_combination(select_metrics):
-    numbers = [1, 2, 4, 8, 16]
-
-    # this will return the combination of numbers that sum to select_metrics integer
-    result = [seq for i in range(len(numbers), 0, -1) for seq in itertools.combinations(numbers, i)
-              if sum(seq) == select_metrics]
-
-    return result
 
 
 if __name__ == "__main__":
@@ -199,10 +144,15 @@ if __name__ == "__main__":
 
     # begin either online sniffing or loading from pcap file
     try:
-        if 1 <= select_metrics <= 31:
-            result = metric_combination(select_metrics)
-        else:
+        metric_1 = SelectMetrics(metric_val=select_metrics)
+
+        if metric_1.validate() is False:
             raise ValueError
+
+        # if 1 <= select_metrics <= 31:
+        #     result = metric_combination(select_metrics)
+        # else:
+        #     raise ValueError
 
         if args.online is True and input_file_FLAG is False:
             live_capture()
