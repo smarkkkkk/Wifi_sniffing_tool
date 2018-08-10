@@ -7,14 +7,13 @@ class AutoBPA(PacketStatistics):
     # Putting new variables before kwargs seems to be allowed.
     # **kwargs is a dictionary of keyword arguments that can take on any
     # number of key, value pairs. No default values are set in Statistics class
-    def __init__(self, normal_bpa, attack_bpa, uncertainty_bpa, adjustment_factor, **kwargs):
+    def __init__(self, sw, **kwargs):
         super().__init__(**kwargs)
-        # if 'data' in kwargs: self._data = kwargs['data']
-
-        self._normal_bpa = normal_bpa
-        self._attack_bpa = attack_bpa
-        self._uncertainty_bpa = uncertainty_bpa
-        self._adjust_factor = adjustment_factor
+        self._sw = sw
+        if 'normal_bpa' in kwargs: self._normal_bpa = kwargs['normal_bpa']
+        if 'attack_bpa' in kwargs: self._attack_bpa = kwargs['attack_bpa']
+        if 'uncertainty_bpa' in kwargs: self._uncertainty_bpa = kwargs['uncertainty_bpa']
+        if 'adjustment_factor' in kwargs: self._adjust_bpa = kwargs['adjustment_factor']
 
     # alpha is not needed for IEEE journal N, A, U calculations
     # def alpha(self, data):
@@ -59,9 +58,9 @@ class AutoBPA(PacketStatistics):
 
     def adjustment_factor(self):
         # Calculate the adjustment factor to be applied to each bpa
-        self._adjust_factor = (self._normal_bpa + self._attack_bpa + self._uncertainty_bpa) / 3
+        self._adjust_bpa = (self._normal_bpa + self._attack_bpa + self._uncertainty_bpa) / 3
 
-        return self._adjust_factor
+        return self._adjust_bpa
 
 
 
