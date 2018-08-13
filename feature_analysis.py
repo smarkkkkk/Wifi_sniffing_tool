@@ -15,8 +15,8 @@ def metric_analysis(dbm_antsignal, datarate, duration, seq, ttl, sw_size):
     sw_seq = seq[0:sw_size]
     sw_ttl = ttl[0:sw_size]
 
-    array_dict = {'dbm_antsignal': dbm_antsignal, 'datarate': datarate,
-                  'duration': duration, 'seq': seq, 'ttl': ttl}
+    array_dict = {'RSSI': dbm_antsignal, 'Rate': datarate,
+                  'NAV': duration, 'Seq': seq, 'TTL': ttl}
 
     sw_dict = {'RSSI': sw_dbm_antsignal, 'Rate': sw_datarate,
                'NAV': sw_duration, 'Seq': sw_seq, 'TTL': sw_ttl}
@@ -38,7 +38,6 @@ def metric_analysis(dbm_antsignal, datarate, duration, seq, ttl, sw_size):
     # Loop through the arrays, extract the next packets one at a time
     # compare features with average values and then add or disregard packet
     # and then update averages
-
 
     # counter = 0
 
@@ -66,7 +65,7 @@ def metric_analysis(dbm_antsignal, datarate, duration, seq, ttl, sw_size):
         for key, arrays in sw_dict.items():
             if feature == key:
                 name = feature + '_bpa'
-                print('Creating instance of AutoBPA class called {}.'
+                print('Creating instance of AutoBPA class called {}. '
                       'The Feature is : {}'.format(name, feature))
                 print(arrays)
                 # creates an instance of AutoBPA class
@@ -75,23 +74,34 @@ def metric_analysis(dbm_antsignal, datarate, duration, seq, ttl, sw_size):
 
     print(instance_dict)
 
-    print('lenght of dbm_antsignal is {}'.format(len(dbm_antsignal)))
+    # print('length of dbm_antsignal is {}'.format(len(dbm_antsignal)))
     start, stop, step = sw_size + 1, len(dbm_antsignal), 1
+    count = 0
+    # consider trying to multithread/multiprocess this secion, or use itertools to speed up the process.
+    # potentially use itertools.product and dict.keys(), dict.values(), dict.items() to loop through them all
 
     for incr in range(start, stop, step):
         for k_1, arrays in array_dict.items():
             for k_2, inst in instance_dict.items():
+                if k_1 == k_2:
+                    # if k_2 == k_1: # this would ensure only the corresponding instances produce bpa's for their arrays
 
-                instance_dict[k_2].mean()
-                instance_dict[k_2].distance(arrays[incr])
-                instance_dict[k_2].box_plot()
+                    instance_dict[k_2].mean()
+                    instance_dict[k_2].distance(arrays[incr])
+                    instance_dict[k_2].box_plot()
 
-                n = instance_dict[k_2].normal(arrays[incr])
-                a = instance_dict[k_2].attack()
-                u = instance_dict[k_2].uncertainty()
-                phi = instance_dict[k_2].adjustment_factor()
+                    n = instance_dict[k_2].normal(arrays[incr])
+                    a = instance_dict[k_2].attack()
+                    u = instance_dict[k_2].uncertainty()
+                    phi = instance_dict[k_2].adjustment_factor()
+                    if count == 0:
+                        print('{} \n'
+                              'Normal = {} \n'
+                              'Attack = {} \n'
+                              'Uncert. = {} \n'
+                              'phi = {} \n'.format(k_2, n, a, u, phi))
+                        break
 
-                
-
+                    count += 1
 
 
