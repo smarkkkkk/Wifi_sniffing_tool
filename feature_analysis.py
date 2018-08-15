@@ -81,6 +81,10 @@ def metric_analysis(dbm_antsignal, datarate, duration, seq, ttl, sw_size):
     # potentially use itertools.product and dict.keys(), dict.values(), dict.items() to loop through them all
 
     for incr in range(start, stop, step):
+        # potentially replace the following 2 for loops and if statement with zip function. As long as array_dict
+        # and instance_dict have the same arrays in them in the same order it should work fine.
+        # potentially use itertools.compress to remove redundant arrays, i.e. metrics, that we are not going to process
+
         for k_1, arrays in array_dict.items():
             for k_2, inst in instance_dict.items():
                 if k_1 == k_2:
