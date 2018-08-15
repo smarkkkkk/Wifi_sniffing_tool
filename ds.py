@@ -10,18 +10,24 @@ class DempsterShafer(MassFunction):
         self._u = uncert
         self._conflict = conflict
 
-    def process_ds(self, frozen_mass_func):
+    @staticmethod
+    def process_ds(frozen_mass_func):
         list_mass_func = list(frozen_mass_func.items())
 
-        self._conflict = 1 / (1 - list_mass_func[1][1])
+        ds_dict = {}
 
-        self._n = self._conflict * (list_mass_func[3][1] + list_mass_func[4][1])
+        conflict = 1 / (1 - list_mass_func[1][1])
 
-        self._a = self._conflict * (list_mass_func[0][1] + list_mass_func[2][1])
+        ds_dict['n'] = conflict * (list_mass_func[3][1] + list_mass_func[4][1])
 
-        self._u = self._conflict * list_mass_func[5][1]
+        ds_dict['a'] = conflict * (list_mass_func[0][1] + list_mass_func[2][1])
 
-        
+        ds_dict['u'] = conflict * list_mass_func[5][1]
+
+        return max(ds_dict.keys(), key=(lambda key: ds_dict[key]))
+    
+
+
 
 
 
