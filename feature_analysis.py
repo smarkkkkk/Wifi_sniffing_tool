@@ -1,5 +1,5 @@
 from autobpa import AutoBPA
-from packetstatistics import PacketStatistics
+# from packetstatistics import PacketStatistics
 from select_metrics import SelectMetrics
 
 
@@ -107,5 +107,3 @@ def metric_analysis(dbm_antsignal, datarate, duration, seq, ttl, sw_size):
                         break
 
                     count += 1
-
-
