@@ -61,8 +61,3 @@ class AutoBPA(PacketStatistics):
         self._adjust_bpa = ((self._normal_bpa + self._attack_bpa + self._uncertainty_bpa) - 1) / 3
 
         return self._adjust_bpa
-
-
-
-
-
