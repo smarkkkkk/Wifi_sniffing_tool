@@ -1,4 +1,4 @@
-# Wifi_sniffing_tool
+# Intrusion Detection System for Airpwn-ng attacks
 
 This repository contains an Intrusion Detection System (IDS) developed from the work of the Signal Processing and Networks Research group at Loughborough University http://www.lboro.ac.uk/departments/meme/research/research-groups/signal-processing-networks/. The IDS is designed to detect and respond, by closing the victims web browser, to attacks launched by the Airpwn-ng tool. 
 
