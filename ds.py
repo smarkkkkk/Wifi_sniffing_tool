@@ -1,10 +1,7 @@
 from pyds.pyds import MassFunction
 
 
-class DempsterShafer(MassFunction):
-
-    def __init__(self, mass_dict):
-        super().__init__(mass_dict)
+class DempsterShafer:
 
     @staticmethod
     def process_ds(frozen_mass_func):
