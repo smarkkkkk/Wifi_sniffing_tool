@@ -1,4 +1,4 @@
-import pyshark, argparse, statistics, itertools, os, time
+import argparse, statistics, itertools, os, time
 import numpy as np
 import traceback
 from scapy.all import *
@@ -6,6 +6,7 @@ from autobpa import AutoBPA
 from packetstatistics import PacketStatistics
 from select_metrics import SelectMetrics
 import feature_analysis
+from pyshark_tools import PysharkTools
 
 
 if __name__ == "__main__":
@@ -66,17 +67,13 @@ if __name__ == "__main__":
     # begin either online sniffing or loading from pcap file
     try:
         metric_1 = SelectMetrics(metric_val=select_metrics)
+        py_shark = PysharkTools()
 
         if metric_1.validate() is False:
             raise ValueError
 
-        # if 1 <= select_metrics <= 31:
-        #     result = metric_combination(select_metrics)
-        # else:
-        #     raise ValueError
-
         if args.online is True and input_file_FLAG is False:
-            live_capture()
+            py_shark.live_capture()
 
         elif input_file_FLAG is True and args.online is False:
             pcap_file = args.input_file
@@ -86,15 +83,15 @@ if __name__ == "__main__":
 
             print('About to start filtering packets...\n')
             #  Call function to filter all packets.
-            pkt_list = filter_packets_pyshark(pcap_file)
+            pkt_list = py_shark.filter_packets(pcap_file)
 
             print('All packets filtered. \n'
                   'Data is now being extracted from packets... \n')
 
             # Call function to extract relevant data from packets.
-            dbm_antsignal, datarate, duration, seq, ttl = extract_packet_data_pyshark(pkt_list)
+            dbm_antsignal, datarate, duration, seq, ttl = py_shark.extract_data(pkt_list)
 
-            feature_analysis.metric_analysis(dbm_antsignal, datarate, duration, seq, ttl, sw_val)
+            feature_analysis.metric_analysis(dbm_antsignal, datarate, duration, seq, ttl, sw_val, select_metrics)
 
             # array_dict, ave_dict, sw_dict = initialise_feature_arrays(dbm_antsignal, datarate,
             #                                                           duration, seq, ttl, sw_val)
