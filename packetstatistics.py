@@ -28,7 +28,6 @@ class PacketStatistics:
     # These functions are called methods in Python classes
     def mean(self):
         self._mean = statistics.mean(self._data)
-        print(self._mean)
         return self._mean
 
     # Frequency is mode in this program
