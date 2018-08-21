@@ -1,12 +1,14 @@
 from autobpa import AutoBPA
-# from packetstatistics import PacketStatistics
+
 from select_metrics import SelectMetrics
+from ds import DempsterShafer
+from pyds.pyds import MassFunction
 
 
 # def metric_analysis():
 # def feature_statistics(dbm_antsignal, datarate, duration, seq, ttl):
 
-def metric_analysis(dbm_antsignal, datarate, duration, seq, ttl, sw_size):
+def metric_analysis(dbm_antsignal, datarate, duration, seq, ttl, sw_size, metric_val):
     # Extract the first 'sw_size' amount of packets and store in new arrays
     # sw -> sliding window + '_feature_name'
     sw_dbm_antsignal = dbm_antsignal[0:sw_size]
@@ -55,19 +57,21 @@ def metric_analysis(dbm_antsignal, datarate, duration, seq, ttl, sw_size):
     # seq_bpa = AutoBPA(data=sw_seq, sw=sw_size)
     # ttl_bpa = AutoBPA(data=sw_ttl, sw=sw_size)
 
-    metric = SelectMetrics(metric_val=sw_size)
+    metric = SelectMetrics(metric_val=metric_val)
     features_to_analyse = metric.metric_combination()
 
     instance_dict = {}
     # create an instance of each feature that is going to be analysed
     # and store the instances in a dictionary 'instance_dict'
     for feature in features_to_analyse:
+
         for key, arrays in sw_dict.items():
+
             if feature == key:
                 name = feature + '_bpa'
                 print('Creating instance of AutoBPA class called {}. '
                       'The Feature is : {}'.format(name, feature))
-                print(arrays)
+
                 # creates an instance of AutoBPA class
                 x = globals()[name] = AutoBPA(data=arrays, sw=sw_size)
                 instance_dict[key] = x
@@ -84,26 +88,59 @@ def metric_analysis(dbm_antsignal, datarate, duration, seq, ttl, sw_size):
         # potentially replace the following 2 for loops and if statement with zip function. As long as array_dict
         # and instance_dict have the same arrays in them in the same order it should work fine.
         # potentially use itertools.compress to remove redundant arrays, i.e. metrics, that we are not going to process
+        ds = DempsterShafer()
+        ds_list = []
 
-        for k_1, arrays in array_dict.items():
-            for k_2, inst in instance_dict.items():
-                if k_1 == k_2:
-                    # if k_2 == k_1: # this would ensure only the corresponding instances produce bpa's for their arrays
+        # for k_1, arrays in zip(array_dict.items(), sw_dict.items()):
+        # print(k_1[0])
+        #     print(arrays[1])
 
-                    instance_dict[k_2].mean()
-                    instance_dict[k_2].distance(arrays[incr])
-                    instance_dict[k_2].box_plot()
+        for array, inst in zip(array_dict.items(), instance_dict.items()):
+            # for k_1, arrays in array_dict.items():
+            #     for k_2, inst in instance_dict.items():
+            #         if k_1 == k_2:
 
-                    n = instance_dict[k_2].normal(arrays[incr])
-                    a = instance_dict[k_2].attack()
-                    u = instance_dict[k_2].uncertainty()
-                    phi = instance_dict[k_2].adjustment_factor()
-                    if count == 0:
-                        print('{} \n'
-                              'Normal = {} \n'
-                              'Attack = {} \n'
-                              'Uncert. = {} \n'
-                              'phi = {} \n'.format(k_2, n, a, u, phi))
-                        break
+            # # Obtain the auto BPA values for each metric
+            # instance_dict[k_2].mean()
+            # instance_dict[k_2].distance(arrays[incr])
+            # instance_dict[k_2].box_plot()
+            print(array[1][incr])
+            instance_dict[inst[0]].mean()
+            instance_dict[inst[0]].distance(array[1][incr])
+            instance_dict[inst[0]].box_plot()
 
-                    count += 1
+            # # N, A, U are returned in a dictionary
+            # # that can be inputted into DS class
+            # ds_dict = instance_dict[k_2].combined_value(arrays[incr])
+            print(inst)
+            print(inst[0])
+            print(inst[1])
+            #instance = inst[1]
+            # ds_dict = instance_dict[inst[0]].combined_value(array[1][incr])
+            ds_dict = instance_dict[inst[0]].combined_value(value=array[1][incr])
+            print(ds_dict)
+            # create instance of DS for each metric with the BPA value dictionary
+            # m = MassFunction(ds_dict)
+            # print(m)
+            # append all metrics to list except the last one
+            # if not len(ds_list) == (len(features_to_analyse) - 1):
+                # ds_list.append(m)
+
+            # name = k_2 + '_dict'
+
+            # x = globals()[name] = AutoBPA(data=arrays, sw=sw_size)
+            # instance_dict[key] = x
+            # if count == 0:
+            #     print('{} \n'
+            #           'Normal = {} \n'
+            #           'Attack = {} \n'
+            #           'Uncert. = {} \n'
+            #           'phi = {} \n'.format(k_2, n, a, u, phi))
+            #     break
+
+            # count += 1
+        # Must use zip function above other wise m.combine_disjunctive will fail when k_1 !== k_2
+        print(ds_list)
+        # Combine all the mass functions into one result for N, A, U
+        # result = m.combine_disjunctive(ds_list)
+        # ds.process_ds(result)
