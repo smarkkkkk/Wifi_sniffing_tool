@@ -15,11 +15,6 @@ class AutoBPA(PacketStatistics):
         if 'uncertainty_bpa' in kwargs: self._uncertainty_bpa = kwargs['uncertainty_bpa']
         if 'adjustment_factor' in kwargs: self._adjust_bpa = kwargs['adjustment_factor']
 
-    # alpha is not needed for IEEE journal N, A, U calculations
-    # def alpha(self, data):
-    # F = statistics.mode(self.initial_data)
-    # a = math.degrees(math.acos(F / (math.sqrt(max(data) + (F^2)) )))
-
     def normal(self, value):
         # This will use quartiles from a box and whisker plot in PacketStatistics
         # to assign a BPA for normal based on the metric value
@@ -32,7 +27,6 @@ class AutoBPA(PacketStatistics):
                 self._normal_bpa = 0.3
         else:
             self._normal_bpa = 0.15
-        print(value)
         return self._normal_bpa
 
     def attack(self):
@@ -61,3 +55,17 @@ class AutoBPA(PacketStatistics):
         self._adjust_bpa = ((self._normal_bpa + self._attack_bpa + self._uncertainty_bpa) - 1) / 3
 
         return self._adjust_bpa
+
+    def combined_value(self, value):
+        ds_dict = {}
+
+        n = self.normal(value)
+        a = self.attack()
+        u = self.uncertainty()
+        phi = self.adjustment_factor()
+
+        ds_dict['n'] = n - phi
+        ds_dict['a'] = a - phi
+        ds_dict['u'] = u - phi
+
+        return ds_dict
