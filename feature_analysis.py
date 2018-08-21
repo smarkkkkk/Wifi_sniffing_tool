@@ -83,6 +83,11 @@ def metric_analysis(dbm_antsignal, datarate, duration, seq, ttl, sw_size, metric
     count = 0
     # consider trying to multithread/multiprocess this secion, or use itertools to speed up the process.
     # potentially use itertools.product and dict.keys(), dict.values(), dict.items() to loop through them all
+    seq = 0
+    ttl = 0
+    rssi = 0
+    rate = 0
+    nav = 0
 
     for incr in range(start, stop, step):
         # potentially replace the following 2 for loops and if statement with zip function. As long as array_dict
@@ -104,7 +109,7 @@ def metric_analysis(dbm_antsignal, datarate, duration, seq, ttl, sw_size, metric
             # instance_dict[k_2].mean()
             # instance_dict[k_2].distance(arrays[incr])
             # instance_dict[k_2].box_plot()
-            print(array[1][incr])
+            # print(array[1][incr])
             instance_dict[inst[0]].mean()
             instance_dict[inst[0]].distance(array[1][incr])
             instance_dict[inst[0]].box_plot()
@@ -112,14 +117,33 @@ def metric_analysis(dbm_antsignal, datarate, duration, seq, ttl, sw_size, metric
             # # N, A, U are returned in a dictionary
             # # that can be inputted into DS class
             # ds_dict = instance_dict[k_2].combined_value(arrays[incr])
-            print(inst)
-            print(inst[0])
-            print(inst[1])
-            #instance = inst[1]
+            # print(inst)
+            # print(inst[0])
+            # print(inst[1])
+            # instance = inst[1]
             # ds_dict = instance_dict[inst[0]].combined_value(array[1][incr])
             ds_dict = instance_dict[inst[0]].combined_value(value=array[1][incr])
             print(ds_dict)
-            # create instance of DS for each metric with the BPA value dictionary
+            if sum(ds_dict.values()) > 1.1 or sum(ds_dict.values()) < 0.9 :
+                print('N, A, U not equal to 1!')
+                print(array[0], inst[0])
+                count += 1
+
+                if array[0] == 'RSSI':
+                    rssi += 1
+                elif array[0] == 'Rate':
+                    rate += 1
+                elif array[0] == 'NAV':
+                    nav += 1
+                elif array[0] == 'Seq':
+                    seq += 1
+                else:
+                    ttl += 1
+        count += 1
+
+        if count == 100:
+            break
+        # break   # create instance of DS for each metric with the BPA value dictionary
             # m = MassFunction(ds_dict)
             # print(m)
             # append all metrics to list except the last one
@@ -139,8 +163,13 @@ def metric_analysis(dbm_antsignal, datarate, duration, seq, ttl, sw_size, metric
             #     break
 
             # count += 1
+
+
+        #print(count)
         # Must use zip function above other wise m.combine_disjunctive will fail when k_1 !== k_2
-        print(ds_list)
+        # print(ds_list)
         # Combine all the mass functions into one result for N, A, U
         # result = m.combine_disjunctive(ds_list)
         # ds.process_ds(result)
+
+    print(rssi, rate, nav, seq, ttl)
