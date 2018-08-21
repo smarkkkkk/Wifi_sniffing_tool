@@ -39,8 +39,13 @@ class PacketStatistics:
 
     def distance(self, new_val):
         self._dist_mean = abs(self._mean - new_val)
-        self._dist_maxval = abs(max(self._data) - new_val)
-        print(self._dist_mean, self._dist_maxval)
+        self._dist_maxval = abs(max(self._data) - self._mean)
+
+        if self._dist_maxval == 0:
+            self._dist_maxval = 0.01
+        if self._dist_mean == 0:
+            self._dist_mean = 0.01
+        # print(self._dist_mean, self._dist_maxval)
 
     def box_plot(self):
         # produces the quartiles and stores them in self.variable_name
@@ -52,4 +57,4 @@ class PacketStatistics:
         self._lower_quart = sorted_data[int((self._sw + 1) / 4)]
         self._upper_quart = sorted_data[int(3 * ((self._sw + 1) / 4))]
         self._inter_quart_range = int(self._upper_quart - self._lower_quart)
-        print(self._lower_quart, self._upper_quart, self._inter_quart_range)
+        # print(self._lower_quart, self._upper_quart, self._inter_quart_range)
