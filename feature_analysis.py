@@ -3,7 +3,7 @@ from autobpa import AutoBPA
 from select_metrics import SelectMetrics
 from ds import DempsterShafer
 from pyds.pyds import MassFunction
-
+import numpy as np
 
 # def metric_analysis():
 # def feature_statistics(dbm_antsignal, datarate, duration, seq, ttl):
@@ -83,11 +83,6 @@ def metric_analysis(dbm_antsignal, datarate, duration, seq, ttl, sw_size, metric
     count = 0
     # consider trying to multithread/multiprocess this secion, or use itertools to speed up the process.
     # potentially use itertools.product and dict.keys(), dict.values(), dict.items() to loop through them all
-    seq = 0
-    ttl = 0
-    rssi = 0
-    rate = 0
-    nav = 0
 
     for incr in range(start, stop, step):
         # potentially replace the following 2 for loops and if statement with zip function. As long as array_dict
@@ -125,6 +120,25 @@ def metric_analysis(dbm_antsignal, datarate, duration, seq, ttl, sw_size, metric
         bpa_result = max(ds_dict.keys(), key=(lambda key: ds_dict[key]))
 
         print(bpa_result)
+
+        if bpa_result is 'n':
+            # This code will increment the arrays and then loop back for the next packet
+
+        elif bpa_result is 'a':
+            # This code will print to sers screen. 'Attack detected in packet no .#.
+            # Closing web browser down
+
+            # This should delete the packets that have been detected as attacks
+            # from the arrays ensuring that when the sw_arrays are incremented
+            # they will not include 'bad' values in them that could skew the stats.
+            for metric, array in array_dict.items():
+                array_dict[metric] = np.delete(array, count)
+                
+        elif bpa_result is 'u':
+            # This code will determine whether N, A is bigger and use that as the metric
+            # to process.
+            # if n == a:
+                # take N as the metric to process.
         if count == 10:
             break
 
@@ -156,4 +170,11 @@ def metric_analysis(dbm_antsignal, datarate, duration, seq, ttl, sw_size, metric
         # Combine all the mass functions into one result for N, A, U
         # result = m.combine_disjunctive(ds_list)
         # ds.process_ds(result)
+
+
+def sliding_window(metric_array, window_size, start_value):
+
+    for x in range(start_value, stop=(len(metric_array)-window_size), step=1):
+
+        yield(metric_array[x:(x+window_size)])
 
