@@ -45,7 +45,8 @@ class PacketStatistics:
             self._dist_maxval = 0.01
         if self._dist_mean == 0:
             self._dist_mean = 0.01
-        # print(self._dist_mean, self._dist_maxval)
+
+        print('Dist_mean is: {}. Dist_maxval is : {}'.format(self._dist_mean, self._dist_maxval))
 
     def box_plot(self):
         # produces the quartiles and stores them in self.variable_name
