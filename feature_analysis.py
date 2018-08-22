@@ -108,7 +108,7 @@ def metric_analysis(dbm_antsignal, datarate, duration, seq, ttl, sw_size, metric
             if not len(MF_list) == (len(features_to_analyse) - 1):
                 MF_list.append(m)
 
-            count += 1
+            # count += 1
 
         print(MF_list)
         # Combine all the mass functions into one result for N, A, U
@@ -122,8 +122,11 @@ def metric_analysis(dbm_antsignal, datarate, duration, seq, ttl, sw_size, metric
         print(bpa_result)
 
         if bpa_result is 'n':
-            # This code will increment the arrays and then loop back for the next packet
+            # This code will increment the sliding window arrays
+            for norm_arrays, sw_arrays in zip(array_dict.values(), sw_dict.keys()):
+                sw_dict[sw_arrays[0]] = sliding_window(norm_arrays[1], sw_size, count)
 
+            count += 1
         elif bpa_result is 'a':
             # This code will print to sers screen. 'Attack detected in packet no .#.
             # Closing web browser down
@@ -131,14 +134,22 @@ def metric_analysis(dbm_antsignal, datarate, duration, seq, ttl, sw_size, metric
             # This should delete the packets that have been detected as attacks
             # from the arrays ensuring that when the sw_arrays are incremented
             # they will not include 'bad' values in them that could skew the stats.
+            print('ATTACK detected in packet {}. Closing web browser!'.format(count))
             for metric, array in array_dict.items():
                 array_dict[metric] = np.delete(array, count)
-                
+
         elif bpa_result is 'u':
             # This code will determine whether N, A is bigger and use that as the metric
             # to process.
             # if n == a:
                 # take N as the metric to process.
+            pass
+        else:
+            # In the unlikely case that there is no maximum value some code here can determine
+            # what action should be taken
+            pass
+        
+        # count += 1
         if count == 10:
             break
 
@@ -174,7 +185,6 @@ def metric_analysis(dbm_antsignal, datarate, duration, seq, ttl, sw_size, metric
 
 def sliding_window(metric_array, window_size, start_value):
 
-    for x in range(start_value, stop=(len(metric_array)-window_size), step=1):
+    # for x in range(start_value, stop=(len(metric_array)-window_size), step=1):
 
-        yield(metric_array[x:(x+window_size)])
-
+    return metric_array[start_value:(start_value+window_size)]
