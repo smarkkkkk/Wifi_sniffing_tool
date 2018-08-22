@@ -106,8 +106,8 @@ if __name__ == "__main__":
 
     except FileNotFoundError:
         print('FileNotFoundError: file or directory does not exist.')
-    except ValueError:
-        print('ValueError: --features must be an integer between 1 and 31, see "select_metrics.txt" for help.')
+    # except ValueError:
+        # print('ValueError: --features must be an integer between 1 and 31, see "select_metrics.txt" for help.')
     except:
         print(traceback.format_exc())
 
