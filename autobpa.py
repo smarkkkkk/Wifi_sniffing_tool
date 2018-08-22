@@ -67,5 +67,5 @@ class AutoBPA(PacketStatistics):
         ds_dict['n'] = n - phi
         ds_dict['a'] = a - phi
         ds_dict['u'] = u - phi
-
+        print(n, a, u)
         return ds_dict
