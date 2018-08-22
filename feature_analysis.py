@@ -125,9 +125,9 @@ def metric_analysis(dbm_antsignal, datarate, duration, seq, ttl, sw_size, metric
         bpa_result = max(ds_dict.keys(), key=(lambda key: ds_dict[key]))
 
         print(bpa_result)
-        if count == 100:
+        if count == 10:
             break
-            
+
         # break   # create instance of DS for each metric with the BPA value dictionary
             # m = MassFunction(ds_dict)
             # print(m)
