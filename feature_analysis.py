@@ -110,25 +110,31 @@ def metric_analysis(dbm_antsignal, datarate, duration, seq, ttl, sw_size, metric
 
             # count += 1
 
-        print(MF_list)
+        # print(MF_list)
         # Combine all the mass functions into one result for N, A, U
         result = m.combine_disjunctive(MF_list)
-
+        # print(result)
         # process the combined DS to produce final N, A, U result
         ds_dict = ds.process_ds(result)
+        # print(ds_dict)
 
+        # find the maximum out of N, A, U for the combined DS values
         bpa_result = max(ds_dict.keys(), key=(lambda key: ds_dict[key]))
 
-        print(bpa_result)
+        # print(bpa_result)
 
         if bpa_result is 'n':
             # This code will increment the sliding window arrays
-            for norm_arrays, sw_arrays in zip(array_dict.values(), sw_dict.keys()):
-                sw_dict[sw_arrays[0]] = sliding_window(norm_arrays[1], sw_size, count)
-
+            # print('Normal detected. incrementing sliding window')
             count += 1
+            for norm_arrays, sw_arrays in zip(array_dict.values(), sw_dict.items()):
+                # print(len(sw_arrays[1]))
+                # print(norm_arrays)
+                sw_dict[sw_arrays[0]] = sliding_window(norm_arrays, sw_size, count)
+                # print(len(sw_dict[sw_arrays[0]]))
+            # count += 1
         elif bpa_result is 'a':
-            # This code will print to sers screen. 'Attack detected in packet no .#.
+            # This code will print to users screen. 'Attack detected in packet no .#.
             # Closing web browser down
 
             # This should delete the packets that have been detected as attacks
@@ -148,9 +154,10 @@ def metric_analysis(dbm_antsignal, datarate, duration, seq, ttl, sw_size, metric
             # In the unlikely case that there is no maximum value some code here can determine
             # what action should be taken
             pass
-        
+        # print(count)
         # count += 1
-        if count == 10:
+        if count == 100:
+
             break
 
         # break   # create instance of DS for each metric with the BPA value dictionary
