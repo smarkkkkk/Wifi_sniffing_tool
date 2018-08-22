@@ -94,55 +94,40 @@ def metric_analysis(dbm_antsignal, datarate, duration, seq, ttl, sw_size, metric
         # and instance_dict have the same arrays in them in the same order it should work fine.
         # potentially use itertools.compress to remove redundant arrays, i.e. metrics, that we are not going to process
         ds = DempsterShafer()
-        ds_list = []
-
-        # for k_1, arrays in zip(array_dict.items(), sw_dict.items()):
-        # print(k_1[0])
-        #     print(arrays[1])
+        MF_list = []
 
         for array, inst in zip(array_dict.items(), instance_dict.items()):
-            # for k_1, arrays in array_dict.items():
-            #     for k_2, inst in instance_dict.items():
-            #         if k_1 == k_2:
 
-            # # Obtain the auto BPA values for each metric
-            # instance_dict[k_2].mean()
-            # instance_dict[k_2].distance(arrays[incr])
-            # instance_dict[k_2].box_plot()
-            # print(array[1][incr])
             instance_dict[inst[0]].mean()
             instance_dict[inst[0]].distance(array[1][incr])
             instance_dict[inst[0]].box_plot()
 
-            # # N, A, U are returned in a dictionary
-            # # that can be inputted into DS class
-            # ds_dict = instance_dict[k_2].combined_value(arrays[incr])
-            # print(inst)
-            # print(inst[0])
-            # print(inst[1])
-            # instance = inst[1]
-            # ds_dict = instance_dict[inst[0]].combined_value(array[1][incr])
+            # N, A, U (BPA) are returned in a dictionary
+            # that can be inputted into MF class
             ds_dict = instance_dict[inst[0]].combined_value(value=array[1][incr])
-            print(ds_dict)
-            if sum(ds_dict.values()) > 1.1 or sum(ds_dict.values()) < 0.9 :
-                print('N, A, U not equal to 1!')
-                print(array[0], inst[0])
-                count += 1
 
-                if array[0] == 'RSSI':
-                    rssi += 1
-                elif array[0] == 'Rate':
-                    rate += 1
-                elif array[0] == 'NAV':
-                    nav += 1
-                elif array[0] == 'Seq':
-                    seq += 1
-                else:
-                    ttl += 1
-        count += 1
+            # create instance of MF fo each metric with the BPA value dictionary
+            m = MassFunction(ds_dict)
 
+            # append all metrics to list except the last one
+            if not len(MF_list) == (len(features_to_analyse) - 1):
+                MF_list.append(m)
+
+            count += 1
+
+        print(MF_list)
+        # Combine all the mass functions into one result for N, A, U
+        result = m.combine_disjunctive(MF_list)
+
+        # process the combined DS to produce final N, A, U result
+        ds_dict = ds.process_ds(result)
+
+        bpa_result = max(ds_dict.keys(), key=(lambda key: ds_dict[key]))
+
+        print(bpa_result)
         if count == 100:
             break
+            
         # break   # create instance of DS for each metric with the BPA value dictionary
             # m = MassFunction(ds_dict)
             # print(m)
@@ -172,4 +157,3 @@ def metric_analysis(dbm_antsignal, datarate, duration, seq, ttl, sw_size, metric
         # result = m.combine_disjunctive(ds_list)
         # ds.process_ds(result)
 
-    print(rssi, rate, nav, seq, ttl)
