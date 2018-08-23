@@ -90,7 +90,7 @@ def metric_analysis(dbm_antsignal, datarate, duration, seq, ttl, sw_size, metric
         # potentially use itertools.compress to remove redundant arrays, i.e. metrics, that we are not going to process
 
         MF_list = []
-
+        print('new packet')
         for array, inst in zip(array_dict.items(), instance_dict.items()):
 
             instance_dict[inst[0]].mean()
@@ -100,7 +100,7 @@ def metric_analysis(dbm_antsignal, datarate, duration, seq, ttl, sw_size, metric
             # N, A, U (BPA) are returned in a dictionary
             # that can be inputted into MF class
             ds_dict = instance_dict[inst[0]].combined_value(value=array[1][incr])
-
+            print(ds_dict)
             # create instance of MF for each metric with the BPA value dictionary
             m = MassFunction(ds_dict)
 
@@ -116,13 +116,13 @@ def metric_analysis(dbm_antsignal, datarate, duration, seq, ttl, sw_size, metric
         # print(result)
         result = dempster_shafer(m, MF_list)
         # print(result)
-        count += 1
+        # count += 1
         # process the combined DS to produce final N, A, U result
         # ds_dict = ds.process_ds(result)
         # print(ds_dict)
 
         # find the maximum out of N, A, U for the combined DS values
-        bpa_result = max(ds_dict.keys(), key=(lambda key: ds_dict[key]))
+        bpa_result = max(result.keys(), key=(lambda key: result[key]))
 
         print(bpa_result)
 
@@ -134,7 +134,7 @@ def metric_analysis(dbm_antsignal, datarate, duration, seq, ttl, sw_size, metric
                 # print(len(sw_arrays[1]))
                 # print(norm_arrays)
                 sw_dict[sw_arrays[0]] = sliding_window(norm_arrays, sw_size, count)
-                # print(len(sw_dict[sw_arrays[0]]))
+                print(len(sw_dict[sw_arrays[0]]))
             # count += 1
         elif bpa_result is 'a':
             # This code will print to users screen. 'Attack detected in packet no .#.
@@ -158,8 +158,8 @@ def metric_analysis(dbm_antsignal, datarate, duration, seq, ttl, sw_size, metric
             # what action should be taken
             pass
         # print(count)
-        # count += 1
-        if count == 1:
+        count += 1
+        if count == 100:
 
             break
 
@@ -199,18 +199,20 @@ def dempster_shafer(m_last, MF_list):
     for m_list in MF_list:
 
         if count == 0:
+            print('Last m is: {}, the first m in list is: {}'.format(m_last, m_list))
             result = m_last.combine_disjunctive(m_list)
             result = ds_1.process_ds(result)
             m = MassFunction(result)
             count += 1
-
+            print(result)
         elif count == (len(MF_list) - 1):
             return m
         else:
+            print('Last m is: {}, the first m in list is: {}'.format(m, m_list))
             result = m.combine_disjunctive(m_list)
             result = ds_1.process_ds(result)
             m = MassFunction(result)
-
+            print(result)
             count += 1
 
 
