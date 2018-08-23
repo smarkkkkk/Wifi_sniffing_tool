@@ -83,12 +83,12 @@ def metric_analysis(dbm_antsignal, datarate, duration, seq, ttl, sw_size, metric
     count = 0
     # consider trying to multithread/multiprocess this secion, or use itertools to speed up the process.
     # potentially use itertools.product and dict.keys(), dict.values(), dict.items() to loop through them all
-
+    ds = DempsterShafer()
     for incr in range(start, stop, step):
         # potentially replace the following 2 for loops and if statement with zip function. As long as array_dict
         # and instance_dict have the same arrays in them in the same order it should work fine.
         # potentially use itertools.compress to remove redundant arrays, i.e. metrics, that we are not going to process
-        ds = DempsterShafer()
+
         MF_list = []
 
         for array, inst in zip(array_dict.items(), instance_dict.items()):
@@ -101,7 +101,7 @@ def metric_analysis(dbm_antsignal, datarate, duration, seq, ttl, sw_size, metric
             # that can be inputted into MF class
             ds_dict = instance_dict[inst[0]].combined_value(value=array[1][incr])
 
-            # create instance of MF fo each metric with the BPA value dictionary
+            # create instance of MF for each metric with the BPA value dictionary
             m = MassFunction(ds_dict)
 
             # append all metrics to list except the last one
@@ -112,16 +112,19 @@ def metric_analysis(dbm_antsignal, datarate, duration, seq, ttl, sw_size, metric
 
         # print(MF_list)
         # Combine all the mass functions into one result for N, A, U
-        result = m.combine_disjunctive(MF_list)
+        # result = m.combine_disjunctive(MF_list)
         # print(result)
+        result = dempster_shafer(m, MF_list)
+        # print(result)
+        count += 1
         # process the combined DS to produce final N, A, U result
-        ds_dict = ds.process_ds(result)
+        # ds_dict = ds.process_ds(result)
         # print(ds_dict)
 
         # find the maximum out of N, A, U for the combined DS values
         bpa_result = max(ds_dict.keys(), key=(lambda key: ds_dict[key]))
 
-        # print(bpa_result)
+        print(bpa_result)
 
         if bpa_result is 'n':
             # This code will increment the sliding window arrays
@@ -156,7 +159,7 @@ def metric_analysis(dbm_antsignal, datarate, duration, seq, ttl, sw_size, metric
             pass
         # print(count)
         # count += 1
-        if count == 100:
+        if count == 1:
 
             break
 
@@ -188,6 +191,27 @@ def metric_analysis(dbm_antsignal, datarate, duration, seq, ttl, sw_size, metric
         # Combine all the mass functions into one result for N, A, U
         # result = m.combine_disjunctive(ds_list)
         # ds.process_ds(result)
+
+def dempster_shafer(m_last, MF_list):
+    count = 0
+    ds_1 = DempsterShafer()
+
+    for m_list in MF_list:
+
+        if count == 0:
+            result = m_last.combine_disjunctive(m_list)
+            result = ds_1.process_ds(result)
+            m = MassFunction(result)
+            count += 1
+
+        elif count == (len(MF_list) - 1):
+            return m
+        else:
+            result = m.combine_disjunctive(m_list)
+            result = ds_1.process_ds(result)
+            m = MassFunction(result)
+
+            count += 1
 
 
 def sliding_window(metric_array, window_size, start_value):
