@@ -32,7 +32,7 @@ class AutoBPA(PacketStatistics):
     def attack(self):
         # Euclidean distance of current value from reference point and reference to max value
         self._attack_bpa = (self._dist_mean * 0.5) / self._dist_maxval
-
+        # print(self._dist_mean, self._dist_maxval)
         return self._attack_bpa
 
     def uncertainty(self):
@@ -53,8 +53,10 @@ class AutoBPA(PacketStatistics):
     def adjustment_factor(self):
         # Calculate the adjustment factor to be applied to each bpa
         self._adjust_bpa = ((self._normal_bpa + self._attack_bpa + self._uncertainty_bpa) - 1) / 3
-
-        return self._adjust_bpa
+        n_phi = self._normal_bpa /(self._normal_bpa + self._attack_bpa + self._uncertainty_bpa)
+        a_phi = self._attack_bpa /(self._normal_bpa + self._attack_bpa + self._uncertainty_bpa)
+        u_phi = self._uncertainty_bpa /(self._normal_bpa + self._attack_bpa + self._uncertainty_bpa)
+        return n_phi, a_phi, u_phi
 
     def combined_value(self, value):
         ds_dict = {}
@@ -62,10 +64,11 @@ class AutoBPA(PacketStatistics):
         n = self.normal(value)
         a = self.attack()
         u = self.uncertainty()
-        phi = self.adjustment_factor()
+        n_phi, a_phi, u_phi = self.adjustment_factor()
+        # print(n, a, u)
 
-        ds_dict['n'] = n - phi
-        ds_dict['a'] = a - phi
-        ds_dict['u'] = u - phi
-        print(n, a, u)
+        ds_dict['n'] = n_phi
+        ds_dict['a'] = a_phi
+        ds_dict['u'] = u_phi
+        # print(n, a, u)
         return ds_dict
