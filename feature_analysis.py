@@ -92,7 +92,7 @@ def metric_analysis(dbm_antsignal, datarate, duration, seq, ttl, sw_size, metric
         MF_list = []
         print('Packet number {}'.format(count))
         for array, inst in zip(array_dict.items(), instance_dict.items()):
-
+            # print('Metric: {}, value: {}'.format(inst[0],array[1][incr]))
             instance_dict[inst[0]].mean()
             instance_dict[inst[0]].distance(array[1][incr])
             instance_dict[inst[0]].box_plot()
@@ -120,19 +120,21 @@ def metric_analysis(dbm_antsignal, datarate, duration, seq, ttl, sw_size, metric
         # find the maximum out of N, A, U for the combined DS values
         bpa_result = max(result.keys(), key=(lambda key: result[key]))
 
-        print(bpa_result)
+        # print(bpa_result)
 
-        if bpa_result is 'n':
+        if 'n' in bpa_result:
             # This code will increment the sliding window arrays
             # print('Normal detected. incrementing sliding window')
-            count += 1
+            # count += 1
             for norm_arrays, sw_arrays in zip(array_dict.values(), sw_dict.items()):
                 # print(len(sw_arrays[1]))
                 # print(norm_arrays)
+                print(sw_dict[sw_arrays[0]])
                 sw_dict[sw_arrays[0]] = sliding_window(norm_arrays, sw_size, count)
-                print(len(sw_dict[sw_arrays[0]]))
+                print(sw_dict[sw_arrays[0]])
+                print('\n')
             # count += 1
-        elif bpa_result is 'a':
+        elif 'a' in bpa_result:
             # This code will print to users screen. 'Attack detected in packet no .#.
             # Closing web browser down
 
@@ -141,21 +143,23 @@ def metric_analysis(dbm_antsignal, datarate, duration, seq, ttl, sw_size, metric
             # they will not include 'bad' values in them that could skew the stats.
             print('ATTACK detected in packet {}. Closing web browser!'.format(count))
             for metric, array in array_dict.items():
+                # check the count value includes the sw_size and is incremented in the correct place
                 array_dict[metric] = np.delete(array, count)
 
-        elif bpa_result is 'u':
-            # This code will determine whether N, A is bigger and use that as the metric
-            # to process.
-            # if n == a:
-                # take N as the metric to process.
-            pass
+        # elif bpa_result is 'u':
+        #     # This code will determine whether N, A is bigger and use that as the metric
+        #     # to process.
+        #     # if n == a:
+        #         # take N as the metric to process.
+        #     pass
         else:
+            print('PASS')
             # In the unlikely case that there is no maximum value some code here can determine
             # what action should be taken
-            pass
+            # pass
 
         count += 1
-        if count == 1:
+        if count == 25:
 
             break
 
