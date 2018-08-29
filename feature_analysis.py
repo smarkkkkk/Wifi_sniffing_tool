@@ -100,7 +100,7 @@ def metric_analysis(dbm_antsignal, datarate, duration, seq, ttl, sw_size, metric
             # N, A, U (BPA) are returned in a dictionary
             # that can be inputted into MF class
             ds_dict = instance_dict[inst[0]].combined_value(value=array[1][incr])
-            print(ds_dict)
+            # print(ds_dict)
             # create instance of MF for each metric with the BPA value dictionary
             m = MassFunction(ds_dict)
 
@@ -109,9 +109,9 @@ def metric_analysis(dbm_antsignal, datarate, duration, seq, ttl, sw_size, metric
                 MF_list.append(m)
 
         # Combine all the mass functions into one result for N, A, U
-        # result = dempster_shafer(m, MF_list)
-        result = m.combine_conjunctive(MF_list)
-        print(result)
+        result = dempster_shafer(m, MF_list)
+        # result = m.combine_conjunctive(MF_list)
+        # print(result)
 
         # process the combined DS to produce final N, A, U result
         # ds_dict = ds.process_ds(result)
@@ -155,7 +155,7 @@ def metric_analysis(dbm_antsignal, datarate, duration, seq, ttl, sw_size, metric
             pass
 
         count += 1
-        if count == 100:
+        if count == 1:
 
             break
 
@@ -191,26 +191,26 @@ def metric_analysis(dbm_antsignal, datarate, duration, seq, ttl, sw_size, metric
 def dempster_shafer(m_last, MF_list):
     count = 0
     ds_1 = DempsterShafer()
-    print(len(MF_list))
+    # print(len(MF_list))
     for m_list in MF_list:
 
         if count == 0:
             # print('Last m is: {}, the first m in list is: {}'.format(m_last, m_list))
             result = m_last.combine_disjunctive(m_list)
-            print(result)
+            # print(result)
             result = ds_1.process_ds(result)
             m = MassFunction(result)
             count += 1
-            # print(result)
-        elif count == len(MF_list):
-            return m
+            # print(m)
+        # elif count == len(MF_list):
+        #     return m
         else:
             # print('Last m is: {}, the first m in list is: {}'.format(m, m_list))
             result = m.combine_disjunctive(m_list)
-            print(result)
+            # print(result)
             result = ds_1.process_ds(result)
             m = MassFunction(result)
-            # print(result)
+            # print(m)
             count += 1
     return m
 
