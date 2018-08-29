@@ -65,7 +65,7 @@ class AutoBPA(PacketStatistics):
         a = self.attack()
         u = self.uncertainty()
         phi, n_phi, a_phi, u_phi = self.adjustment_factor()
-        print(n, a, u)
+        # print(n, a, u)
 
         ds_dict['n'] = n - phi
         ds_dict['a'] = a - phi
