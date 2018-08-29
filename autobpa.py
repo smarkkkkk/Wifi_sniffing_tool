@@ -32,7 +32,7 @@ class AutoBPA(PacketStatistics):
     def attack(self):
         # Euclidean distance of current value from reference point and reference to max value
         self._attack_bpa = (self._dist_mean * 0.5) / self._dist_maxval
-        # print(self._dist_mean, self._dist_maxval)
+        # print(self._dist_mean, self._dist_maxval, self._attack_bpa)
         return self._attack_bpa
 
     def uncertainty(self):
