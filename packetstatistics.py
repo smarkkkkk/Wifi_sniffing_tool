@@ -28,6 +28,7 @@ class PacketStatistics:
     # These functions are called methods in Python classes
     def mean(self):
         self._mean = statistics.mean(self._data)
+        # print('Mean value is: {}'.format(self._mean))
         return self._mean
 
     # Frequency is mode in this program
@@ -38,13 +39,19 @@ class PacketStatistics:
         self._median = statistics.median(self._data)
 
     def distance(self, new_val):
-        self._dist_mean = abs(self._mean - new_val)
-        self._dist_maxval = abs(max(self._data) - self._mean)
 
-        if self._dist_maxval == 0:
-            self._dist_maxval = 0.01
-        if self._dist_mean == 0:
-            self._dist_mean = 0.01
+        if abs(min(self._data) - self._mean) >= abs(self._mean - max(self._data)):
+            self._dist_maxval = abs(min(self._data) - self._mean)
+            # print('smaller')
+        else:
+            self._dist_maxval = abs(max(self._data) - self._mean)
+
+        self._dist_mean = abs(self._mean - new_val)
+
+        # if self._dist_maxval == 0:
+        #     self._dist_maxval = 0.01
+        # if self._dist_mean == 0:
+        #     self._dist_mean = 0.01
 
         # print('Dist_mean is: {}. Dist_maxval is : {}'.format(self._dist_mean, self._dist_maxval))
 
