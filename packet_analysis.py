@@ -3,7 +3,36 @@ import numpy as np
 
 
 class PacketAnalysis:
-    def __init(self, **kwargs):
+
+    def __init(self, array_dict, sw_dict, sw_val, **kwargs):
+        self._array_dict = array_dict
+        self._sw_dict = sw_dict
+        self._sw_val = sw_val
+
+    def sliding_window(self, start_value):
+        # for x in range(start_value, stop=(len(metric_array)-window_size), step=1):
+        for norm_arrays, sw_arrays in zip(self._array_dict.values(), self._sw_dict.items()):
+            self._sw_dict[sw_arrays[0]] = norm_arrays[start_value:(start_value + self._sw_val)]
+
+        return self._sw_dict
+
+    def delete_frame_data(self, count):
+        print('ATTACK detected in packet {}. Closing web browser!'.format(count))
+        for metric, array in self._array_dict.items():
+            # check the count value includes the sw_size and is incremented in the correct place
+            self._array_dict[metric] = np.delete(array, count)
+
+        return self._array_dict
+
+
+
+
+
+
+
+
+
+
 
 
     def list_to_array(self, lists):
