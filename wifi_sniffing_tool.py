@@ -85,7 +85,7 @@ if __name__ == "__main__":
             #  Call function to filter all packets.
             pkt_list = py_shark.filter_packets(pcap_file)
 
-            print('All packets filtered. \n'
+            print('All packets filtered.'
                   'Data is now being extracted from packets... \n')
 
             # Call function to extract relevant data from packets.
