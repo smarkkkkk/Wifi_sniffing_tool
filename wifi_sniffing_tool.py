@@ -89,7 +89,11 @@ if __name__ == "__main__":
                   'Data is now being extracted from packets... \n')
 
             # Call function to extract relevant data from packets.
-            dbm_antsignal, datarate, duration, seq, ttl = py_shark.extract_data(pkt_list)
+            dbm_antsignal, datarate, duration, seq, ttl, metric_dict = py_shark.extract_data(pkt_list)
+
+            # when extract_data is updated the new PacketAnalysis class will
+            # only need metric_dict to work correctly
+            # metric_dict = py_shark.extract_data(pkt_list)
 
             feature_analysis.metric_analysis(dbm_antsignal, datarate, duration, seq, ttl, sw_val, select_metrics)
 
