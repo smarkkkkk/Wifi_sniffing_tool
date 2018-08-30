@@ -8,6 +8,7 @@ import numpy as np
 # def metric_analysis():
 # def feature_statistics(dbm_antsignal, datarate, duration, seq, ttl):
 
+
 def metric_analysis(dbm_antsignal, datarate, duration, seq, ttl, sw_size, metric_val):
     # Extract the first 'sw_size' amount of packets and store in new arrays
     # sw -> sliding window + '_feature_name'
@@ -109,7 +110,7 @@ def metric_analysis(dbm_antsignal, datarate, duration, seq, ttl, sw_size, metric
                 MF_list.append(m)
 
         # Combine all the mass functions into one result for N, A, U
-        result = dempster_shafer(m, MF_list)
+        result = ds.fuse_metrics(m, MF_list)
         # result = m.combine_conjunctive(MF_list)
         # print(result)
 
@@ -129,10 +130,10 @@ def metric_analysis(dbm_antsignal, datarate, duration, seq, ttl, sw_size, metric
             for norm_arrays, sw_arrays in zip(array_dict.values(), sw_dict.items()):
                 # print(len(sw_arrays[1]))
                 # print(norm_arrays)
-                print(sw_dict[sw_arrays[0]])
+                # print(sw_dict[sw_arrays[0]])
                 sw_dict[sw_arrays[0]] = sliding_window(norm_arrays, sw_size, count)
-                print(sw_dict[sw_arrays[0]])
-                print('\n')
+                # print(sw_dict[sw_arrays[0]])
+                # print('\n')
             # count += 1
         elif 'a' in bpa_result:
             # This code will print to users screen. 'Attack detected in packet no .#.
@@ -191,32 +192,6 @@ def metric_analysis(dbm_antsignal, datarate, duration, seq, ttl, sw_size, metric
         # Combine all the mass functions into one result for N, A, U
         # result = m.combine_disjunctive(ds_list)
         # ds.process_ds(result)
-
-def dempster_shafer(m_last, MF_list):
-    count = 0
-    ds_1 = DempsterShafer()
-    # print(len(MF_list))
-    for m_list in MF_list:
-
-        if count == 0:
-            # print('Last m is: {}, the first m in list is: {}'.format(m_last, m_list))
-            result = m_last.combine_disjunctive(m_list)
-            # print(result)
-            result = ds_1.process_ds(result)
-            m = MassFunction(result)
-            count += 1
-            # print(m)
-        # elif count == len(MF_list):
-        #     return m
-        else:
-            # print('Last m is: {}, the first m in list is: {}'.format(m, m_list))
-            result = m.combine_disjunctive(m_list)
-            # print(result)
-            result = ds_1.process_ds(result)
-            m = MassFunction(result)
-            # print(m)
-            count += 1
-    return m
 
 
 def sliding_window(metric_array, window_size, start_value):
