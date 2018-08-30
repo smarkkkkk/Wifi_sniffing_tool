@@ -48,6 +48,10 @@ class PacketStatistics:
 
         self._dist_mean = abs(self._mean - new_val)
 
+        # Uncommenting this section assigns 0.01 to a lot of metric processing
+        # BPA values. This then gives A = 0.5, which is too
+        # high to be justified given the conditions.
+
         # if self._dist_maxval == 0:
         #     self._dist_maxval = 0.01
         # if self._dist_mean == 0:
