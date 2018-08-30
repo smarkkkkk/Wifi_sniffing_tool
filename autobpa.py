@@ -33,6 +33,9 @@ class AutoBPA(PacketStatistics):
         # Euclidean distance of current value from reference point and reference to max value
         self._attack_bpa = (self._dist_mean * 0.5) / self._dist_maxval
         # print(self._dist_mean, self._dist_maxval, self._attack_bpa)
+        if self._attack_bpa > 0.5:
+            self._attack_bpa = 0.5
+
         return self._attack_bpa
 
     def uncertainty(self):
@@ -76,3 +79,23 @@ class AutoBPA(PacketStatistics):
         # ds_dict['u'] = u_phi
 
         return ds_dict
+
+    @classmethod
+    def create_instance(cls, features_to_analyse, sw_dict, sw_size):
+        instance_dict = {}
+
+        # create an instance of each feature that is going to be analysed
+        # and store the instances in a dictionary 'instance_dict'
+        for feature, sw_dict_iter in zip(features_to_analyse, sw_dict.items()):
+            # for feature in features_to_analyse:
+            #     for key, arrays in sw_dict.items():
+            #         if feature == key:
+            name = feature + '_bpa'
+            print('Creating instance of AutoBPA class called {}. '
+                  'The Feature is : {}'.format(name, feature))
+
+            # creates an instance of AutoBPA class
+            instance = globals()[name] = AutoBPA(data=sw_dict_iter[1], sw=sw_size)
+            instance_dict[sw_dict_iter[0]] = instance
+
+        return instance_dict
