@@ -4,6 +4,7 @@ from ds import DempsterShafer
 from pyds.pyds import MassFunction
 from autobpa import AutoBPA
 
+
 class PacketAnalysis:
 
     def __init(self, array_dict, sw_dict, sw_val, features_to_analyse, **kwargs):
@@ -29,7 +30,8 @@ class PacketAnalysis:
         for incr in range(start, stop, step):
             # potentially replace the following 2 for loops and if statement with zip function. As long as array_dict
             # and instance_dict have the same arrays in them in the same order it should work fine.
-            # potentially use itertools.compress to remove redundant arrays, i.e. metrics, that we are not going to process
+            # potentially use itertools.compress to remove redundant arrays, i.e. metrics, that we are
+            # not going to process
 
             MF_list = []
             print('Packet number {}'.format(pkt_count))
@@ -62,14 +64,12 @@ class PacketAnalysis:
                                                          self._sw_dict, self._sw_val)
             elif 'a' in bpa_result:
                 attack_count += 1
-                print('ATTACK detected in packet {}. Closing web browser!'.format(count))
+                print('ATTACK detected in packet {}. Closing web browser!'.format(pkt_count))
                 self.delete_frame_data(pkt_count)
             elif 'u' in bpa_result:
                 pass
             else:
                 pass
-
-
 
     def sliding_window(self, start_value):
         # for x in range(start_value, stop=(len(metric_array)-window_size), step=1):
@@ -86,49 +86,38 @@ class PacketAnalysis:
 
         # return self._array_dict
 
-
-
-
-
-
-
-
-
-
-
-
-    def list_to_array(self, lists):
-        lists = [lists]
-
-        for _list in lists:
-
-    def data_to_csv(self):
-        # Convert all packet feature lists to numpy arrays
-        dbm_antsignal = np.asarray(dbm_antsignal)
-        datarate = np.asarray(datarate)
-        duration = np.asarray(duration)
-        seq = np.asarray(seq)
-        ttl = np.asarray(ttl)
-
-        # Write all packet feature data to .csv file
-        pkt_incr = 0
-        pkt_data = np.zeros((len(dbm_antsignal), 5))
-
-        while pkt_incr < len(dbm_antsignal):
-            pkt_data[pkt_incr][0] = dbm_antsignal[pkt_incr]
-            pkt_data[pkt_incr][1] = datarate[pkt_incr]
-            pkt_data[pkt_incr][2] = duration[pkt_incr]
-            pkt_data[pkt_incr][3] = seq[pkt_incr]
-            pkt_data[pkt_incr][4] = ttl[pkt_incr]
-            # print(dbm_antsignal[pkt_incr], datarate[pkt_incr], duration[pkt_incr], seq[pkt_incr], ttl[pkt_incr])
-            pkt_incr += 1
-
-        np.savetxt('data.csv', pkt_data, fmt='%1.10e', delimiter='\t')
-
-    def sliding_window(self, array, sw_val, incr_val):
-        sw_dbm_antsignal = dbm_antsignal[0:sw_size]
-        sw_datarate = datarate[0:sw_size]
-        sw_duration = duration[0:sw_size]
-        sw_seq = seq[0:sw_size]
-        sw_ttl = ttl[0:sw_size]
+    # def list_to_array(self, lists):
+    #     lists = [lists]
+    #
+    #     for _list in lists:
+    #
+    # def data_to_csv(self):
+    #     # Convert all packet feature lists to numpy arrays
+    #     dbm_antsignal = np.asarray(dbm_antsignal)
+    #     datarate = np.asarray(datarate)
+    #     duration = np.asarray(duration)
+    #     seq = np.asarray(seq)
+    #     ttl = np.asarray(ttl)
+    #
+    #     # Write all packet feature data to .csv file
+    #     pkt_incr = 0
+    #     pkt_data = np.zeros((len(dbm_antsignal), 5))
+    #
+    #     while pkt_incr < len(dbm_antsignal):
+    #         pkt_data[pkt_incr][0] = dbm_antsignal[pkt_incr]
+    #         pkt_data[pkt_incr][1] = datarate[pkt_incr]
+    #         pkt_data[pkt_incr][2] = duration[pkt_incr]
+    #         pkt_data[pkt_incr][3] = seq[pkt_incr]
+    #         pkt_data[pkt_incr][4] = ttl[pkt_incr]
+    #         # print(dbm_antsignal[pkt_incr], datarate[pkt_incr], duration[pkt_incr], seq[pkt_incr], ttl[pkt_incr])
+    #         pkt_incr += 1
+    #
+    #     np.savetxt('data.csv', pkt_data, fmt='%1.10e', delimiter='\t')
+    #
+    # def sliding_window(self, array, sw_val, incr_val):
+    #     sw_dbm_antsignal = dbm_antsignal[0:sw_size]
+    #     sw_datarate = datarate[0:sw_size]
+    #     sw_duration = duration[0:sw_size]
+    #     sw_seq = seq[0:sw_size]
+    #     sw_ttl = ttl[0:sw_size]
 

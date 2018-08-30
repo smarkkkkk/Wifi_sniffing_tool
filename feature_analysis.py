@@ -124,9 +124,9 @@ def metric_analysis(dbm_antsignal, datarate, duration, seq, ttl, sw_size, metric
             # pass
 
         count += 1
-        if count == 2000:
-            print(attack_count)
-            break
+        #if count == 2000:
+        print(attack_count)
+         #   break
 
         # break   # create instance of DS for each metric with the BPA value dictionary
             # m = MassFunction(ds_dict)
