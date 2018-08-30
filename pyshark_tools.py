@@ -56,7 +56,10 @@ class PysharkTools:
 
         np.savetxt('data.csv', pkt_data, fmt='%1.10e', delimiter='\t')
 
-        return dbm_antsignal, datarate, duration, seq, ttl
+        metric_dict = {'RSSI': dbm_antsignal, 'Rate': datarate,
+                       'NAV': duration, 'Seq': seq, 'TTL': ttl}
+
+        return dbm_antsignal, datarate, duration, seq, ttl, metric_dict
 
     @staticmethod
     def live_capture():
