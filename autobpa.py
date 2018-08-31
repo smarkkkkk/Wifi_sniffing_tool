@@ -91,8 +91,8 @@ class AutoBPA(PacketStatistics):
             #     for key, arrays in sw_dict.items():
             #         if feature == key:
             name = feature + '_bpa'
-            print('Creating instance of AutoBPA class called {}. '
-                  'The Feature is : {}'.format(name, feature))
+            # print('Creating instance of AutoBPA class called {}. '
+            #       'The Feature is : {}'.format(name, feature))
 
             # creates an instance of AutoBPA class
             instance = globals()[name] = AutoBPA(data=sw_dict_iter[1], sw=sw_size)
