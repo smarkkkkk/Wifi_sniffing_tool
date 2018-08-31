@@ -21,10 +21,12 @@ class PacketAnalysis:
         instance_dict = inst_bpa.create_instance(self._features_to_analyse,
                                                  self._sw_dict, self._sw_val)
         # function variables
-        start, stop, step = self._sw_val + 1, len(self._array_dict['RSSI']), 1
+        start, stop, step = self._sw_val, len(self._array_dict['RSSI']), 1
         pkt_count = 0
         attack_count = 0
 
+        print('The first 0->29 packets are used '
+              'to develop the normal network behaviour.')
         # consider trying to multithread/multiprocess this secion, or use itertools to speed up the process.
         # potentially use itertools.product and dict.keys(), dict.values(), dict.items() to loop through them all
         for incr in range(start, stop, step):
@@ -64,14 +66,19 @@ class PacketAnalysis:
                                                          self._sw_dict, self._sw_val)
             elif 'a' in bpa_result:
                 attack_count += 1
-                print('ATTACK detected in packet {}. Closing web browser!'.format(pkt_count))
-                self.delete_frame_data(pkt_count)
-            elif 'u' in bpa_result:
-                pass
-            else:
-                pass
+                print('ATTACK detected in packet {}. Closing web browser!'.format(pkt_count + 30))
+                self.delete_frame_data(incr)
+            # elif 'u' in bpa_result:
+            #     continue
+            # else:
+            #     continue
+
+            pkt_count += 1
+
+        print(attack_count)
 
     def sliding_window(self, start_value):
+        # start_value = start_value + 30
         # for x in range(start_value, stop=(len(metric_array)-window_size), step=1):
         for norm_arrays, sw_arrays in zip(self._array_dict.values(), self._sw_dict.items()):
             self._sw_dict[sw_arrays[0]] = norm_arrays[start_value:(start_value + self._sw_val)]
