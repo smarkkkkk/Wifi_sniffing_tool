@@ -95,7 +95,9 @@ if __name__ == "__main__":
             # only need metric_dict to work correctly
             # metric_dict = py_shark.extract_data(pkt_list)
 
-            feature_analysis.metric_analysis(dbm_antsignal, datarate, duration, seq, ttl, sw_val, select_metrics)
+            feature_analysis.oo_function(metric_dict, select_metrics, sw_val)
+
+            # feature_analysis.metric_analysis(dbm_antsignal, datarate, duration, seq, ttl, sw_val, select_metrics)
 
             # array_dict, ave_dict, sw_dict = initialise_feature_arrays(dbm_antsignal, datarate,
             #                                                           duration, seq, ttl, sw_val)
