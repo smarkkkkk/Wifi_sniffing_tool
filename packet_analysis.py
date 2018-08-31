@@ -7,7 +7,7 @@ from autobpa import AutoBPA
 
 class PacketAnalysis:
 
-    def __init(self, array_dict, sw_dict, sw_val, features_to_analyse, **kwargs):
+    def __init__(self, array_dict, sw_dict, sw_val, features_to_analyse):
         self._array_dict = array_dict
         self._sw_dict = sw_dict
         self._sw_val = sw_val
@@ -17,7 +17,7 @@ class PacketAnalysis:
         ds = DempsterShafer()
         inst_bpa = AutoBPA
 
-        # create dyanmic instances of AutoBPA class
+        # create dynamic instances of AutoBPA class
         instance_dict = inst_bpa.create_instance(self._features_to_analyse,
                                                  self._sw_dict, self._sw_val)
         # function variables
