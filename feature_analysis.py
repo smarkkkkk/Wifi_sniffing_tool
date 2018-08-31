@@ -4,6 +4,8 @@ from select_metrics import SelectMetrics
 from ds import DempsterShafer
 from pyds.pyds import MassFunction
 import numpy as np
+from packet_analysis import PacketAnalysis
+from autobpa import AutoBPA
 
 
 def metric_analysis(dbm_antsignal, datarate, duration, seq, ttl, sw_size, metric_val):
@@ -163,3 +165,35 @@ def sliding_window(metric_array, window_size, start_value):
     # for x in range(start_value, stop=(len(metric_array)-window_size), step=1):
 
     return metric_array[start_value:(start_value+window_size)]
+
+
+def oo_function(metric_dict, select_metrics, sw_val):
+    # fake_data = [1,2,3,3,5,4,7,86,4,55,2,2,22,2,2,2,2,2]
+    # inst_autobpa = AutoBPA(data=fake_data, sw=sw_val)
+
+    slt_metrics = SelectMetrics(metric_val=select_metrics)
+
+    features_to_analyse = slt_metrics.metric_combination()
+    #
+    # produce initial sliding windows frame in dict called sw_dict
+    sw_dict = {}
+    for metric, metric_array in zip(features_to_analyse, metric_dict.values()):
+        sw_dict[metric] = metric_array[0:sw_val]
+
+    # print(sw_dict)
+    pa = PacketAnalysis(array_dict=metric_dict, sw_dict=sw_dict,
+                        sw_val=sw_val, features_to_analyse=features_to_analyse)
+
+    # instance_dictionary = inst_autobpa.create_instance(features_to_analyse=features_to_analyse,
+    #                                                    sw_dict=sw_dict, sw_size=sw_val)
+    #
+    # print(instance_dictionary)
+    #
+    # inst_autobpa_new = AutoBPA(sw=sw_val, data=fake_data)
+    #
+    # instance_dictionary_new = inst_autobpa_new.create_instance(features_to_analyse=features_to_analyse,
+    #                                  sw_dict=sw_dict, sw_size=sw_val)
+    #
+    # print(instance_dictionary_new)
+
+    pa.process_packets()
