@@ -168,8 +168,8 @@ def sliding_window(metric_array, window_size, start_value):
 
 
 def oo_function(metric_dict, select_metrics, sw_val):
-    # fake_data = [1,2,3,3,5,4,7,86,4,55,2,2,22,2,2,2,2,2]
-    # inst_autobpa = AutoBPA(data=fake_data, sw=sw_val)
+    ds_inst = DempsterShafer
+    inst_bpa = AutoBPA
 
     slt_metrics = SelectMetrics(metric_val=select_metrics)
 
@@ -181,22 +181,22 @@ def oo_function(metric_dict, select_metrics, sw_val):
         sw_dict[metric] = metric_array[0:sw_val]
 
     print(sw_dict)
-    pa = PacketAnalysis(array_dict=metric_dict, sw_dict=sw_dict,
-                        sw_val=sw_val, features_to_analyse=features_to_analyse)
-
-
-    # print(metric_dict['RSSI'][30])  # this is start value
-
-    ds = DempsterShafer
-    inst_bpa = AutoBPA
 
     # create dynamic instances of AutoBPA class
     instance_dict = inst_bpa.create_instance(features_to_analyse,
                                              sw_dict, sw_val)
+
     # function variables
     start, stop, step = sw_val, len(metric_dict['RSSI']), 1
     pkt_count = 0
     attack_count = 0
+
+    pa = PacketAnalysis(array_dict=metric_dict, sw_dict=sw_dict,
+                        sw_val=sw_val, features_to_analyse=features_to_analyse,
+                        instance_dict=instance_dict, pkt_count=pkt_count,
+                        attack_count=attack_count)
+
+    # print(metric_dict['RSSI'][30])  # this is start value
 
     print('The first 0->29 packets are used '
           'to develop the normal network behaviour.')
@@ -204,10 +204,10 @@ def oo_function(metric_dict, select_metrics, sw_val):
     for incr in range(start, stop, step):
         print('Packet number {}'.format(pkt_count))
         MF_list = []
-        for array, inst in zip(metric_dict.items(), instance_dict.items()):
-            data_val = array[1][incr]
+        # for array, inst in zip(metric_dict.items(), instance_dict.items()):
+        #     data_val = array[1][incr]
+        #     inst_auto_bpa = instance_dict[inst[0]]
 
-            pa.process_packets(data_val, instance_dict, ds,
-                               inst_bpa, incr, MF_list)
+        pa.process_packets(ds_inst, inst_bpa, incr)
 
-        pkt_count += 1
+        # pkt_count += 1
