@@ -180,20 +180,34 @@ def oo_function(metric_dict, select_metrics, sw_val):
     for metric, metric_array in zip(features_to_analyse, metric_dict.values()):
         sw_dict[metric] = metric_array[0:sw_val]
 
-    # print(sw_dict)
+    print(sw_dict)
     pa = PacketAnalysis(array_dict=metric_dict, sw_dict=sw_dict,
                         sw_val=sw_val, features_to_analyse=features_to_analyse)
 
-    # instance_dictionary = inst_autobpa.create_instance(features_to_analyse=features_to_analyse,
-    #                                                    sw_dict=sw_dict, sw_size=sw_val)
-    #
-    # print(instance_dictionary)
-    #
-    # inst_autobpa_new = AutoBPA(sw=sw_val, data=fake_data)
-    #
-    # instance_dictionary_new = inst_autobpa_new.create_instance(features_to_analyse=features_to_analyse,
-    #                                  sw_dict=sw_dict, sw_size=sw_val)
-    #
-    # print(instance_dictionary_new)
 
-    pa.process_packets()
+    # print(metric_dict['RSSI'][30])  # this is start value
+
+    ds = DempsterShafer
+    inst_bpa = AutoBPA
+
+    # create dynamic instances of AutoBPA class
+    instance_dict = inst_bpa.create_instance(features_to_analyse,
+                                             sw_dict, sw_val)
+    # function variables
+    start, stop, step = sw_val, len(metric_dict['RSSI']), 1
+    pkt_count = 0
+    attack_count = 0
+
+    print('The first 0->29 packets are used '
+          'to develop the normal network behaviour.')
+
+    for incr in range(start, stop, step):
+        print('Packet number {}'.format(pkt_count))
+        MF_list = []
+        for array, inst in zip(metric_dict.items(), instance_dict.items()):
+            data_val = array[1][incr]
+
+            pa.process_packets(data_val, instance_dict, ds,
+                               inst_bpa, incr, MF_list)
+
+        pkt_count += 1
