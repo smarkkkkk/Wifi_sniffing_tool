@@ -7,7 +7,7 @@ from autobpa import AutoBPA
 
 class PacketAnalysis:
 
-    def __init(self, array_dict, sw_dict, sw_val, features_to_analyse, **kwargs):
+    def __init__(self, array_dict, sw_dict, sw_val, features_to_analyse, **kwargs):
         self._array_dict = array_dict
         self._sw_dict = sw_dict
         self._sw_val = sw_val
@@ -24,17 +24,19 @@ class PacketAnalysis:
         start, stop, step = self._sw_val + 1, len(self._array_dict['RSSI']), 1
         pkt_count = 0
         attack_count = 0
-
+        incr = 0
+        print(len(self._array_dict['RSSI']))
         # consider trying to multithread/multiprocess this secion, or use itertools to speed up the process.
         # potentially use itertools.product and dict.keys(), dict.values(), dict.items() to loop through them all
-        for incr in range(start, stop, step):
+        # for incr in range(start, stop, step):
+        while incr < len(self._array_dict['RSSI']):
             # potentially replace the following 2 for loops and if statement with zip function. As long as array_dict
             # and instance_dict have the same arrays in them in the same order it should work fine.
             # potentially use itertools.compress to remove redundant arrays, i.e. metrics, that we are
             # not going to process
 
             MF_list = []
-            print('Packet number {}'.format(pkt_count))
+            # print('Packet number {}'.format(pkt_count))
             for array, inst in zip(self._array_dict.items(), instance_dict.items()):
                 # print('Metric: {}, value: {}'.format(inst[0],array[1][incr]))
                 instance_dict[inst[0]].mean()
@@ -62,14 +64,19 @@ class PacketAnalysis:
                 self.sliding_window(pkt_count)
                 instance_dict = inst_bpa.create_instance(self._features_to_analyse,
                                                          self._sw_dict, self._sw_val)
+                pkt_count += 1
+                incr += 1
             elif 'a' in bpa_result:
                 attack_count += 1
                 print('ATTACK detected in packet {}. Closing web browser!'.format(pkt_count))
-                self.delete_frame_data(pkt_count)
+                self.delete_frame_data(incr)
+                pkt_count += 1
             elif 'u' in bpa_result:
                 pass
             else:
                 pass
+            # incr += 1
+            # pkt_count += 1
 
     def sliding_window(self, start_value):
         # for x in range(start_value, stop=(len(metric_array)-window_size), step=1):
@@ -79,7 +86,7 @@ class PacketAnalysis:
         # return self._sw_dict
 
     def delete_frame_data(self, count):
-        print('ATTACK detected in packet {}. Closing web browser!'.format(count))
+        # print('ATTACK detected in packet {}. Closing web browser!'.format(count))
         for metric, array in self._array_dict.items():
             # check the count value includes the sw_size and is incremented in the correct place
             self._array_dict[metric] = np.delete(array, count)
