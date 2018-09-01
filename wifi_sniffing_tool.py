@@ -1,6 +1,6 @@
-import argparse, statistics, itertools, os, time
+import argparse # , statistics, itertools, os, time
 import numpy as np
-import traceback
+# import traceback
 from scapy.all import *
 from autobpa import AutoBPA
 from packetstatistics import PacketStatistics
@@ -85,7 +85,7 @@ if __name__ == "__main__":
             #  Call function to filter all packets.
             pkt_list = py_shark.filter_packets(pcap_file)
 
-            print('All packets filtered.'
+            print('All packets filtered. '
                   'Data is now being extracted from packets... \n')
 
             # Call function to extract relevant data from packets.
