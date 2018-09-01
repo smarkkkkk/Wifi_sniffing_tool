@@ -16,6 +16,7 @@ class PacketAnalysis:
     def process_packets(self):
         ds = DempsterShafer()
         inst_bpa = AutoBPA
+        print(inst_bpa)
 
         # create dyanmic instances of AutoBPA class
         instance_dict = inst_bpa.create_instance(self._features_to_analyse,
@@ -64,16 +65,18 @@ class PacketAnalysis:
             bpa_result = max(result.keys(), key=(lambda key: result[key]))
 
             if 'n' in bpa_result:
+                # print(self._sw_dict)
                 self.sliding_window(incr)
                 instance_dict = inst_bpa.create_instance(self._features_to_analyse,
                                                          self._sw_dict, self._sw_val)
                 # print(instance_dict)
+                # print(self._sw_dict)
                 pkt_count += 1
                 incr += 1
             elif 'a' in bpa_result:
                 attack_count += 1
                 print('ATTACK detected in packet {}. Closing web browser!'.format(pkt_count))
-                print('Data that needs to be deleted: {}'.format(data_list))
+                # print('Data that needs to be deleted: {}'.format(data_list))
                 self.delete_frame_data(incr)
                 pkt_count += 1
             elif 'u' in bpa_result:
@@ -85,6 +88,7 @@ class PacketAnalysis:
             #print('Incr value is: {}, '
                   #'pkt_count value is: {}'.format(incr, pkt_count))
         print(attack_count)
+        print(inst_bpa)
 
     def sliding_window(self, start_value):
         # for x in range(start_value, stop=(len(metric_array)-window_size), step=1):
@@ -93,9 +97,9 @@ class PacketAnalysis:
         if (start_value + self._sw_val) < len((self._array_dict['RSSI'])):
             for norm_arrays, sw_arrays in zip(self._array_dict.values(), self._sw_dict.items()):
                 # print(start_value, (start_value+self._sw_val))
-                # print(len(self._sw_dict[sw_arrays[0]]))
+                # print(self._sw_dict[sw_arrays[0]])
                 self._sw_dict[sw_arrays[0]] = norm_arrays[start_value:(start_value + self._sw_val)]
-                # print(len(self._sw_dict[sw_arrays[0]]))
+                # print(self._sw_dict[sw_arrays[0]])
         else:
             print('Sliding window can no longer be implemented due to end of frames approaching!')
         # return self._sw_dict
@@ -103,7 +107,7 @@ class PacketAnalysis:
     def delete_frame_data(self, count):
         # print('ATTACK detected in packet {}. Closing web browser!'.format(count))
         for metric, array in self._array_dict.items():
-            print('Deleting data: {}'.format(self._array_dict[metric][count]))
+            # print('Deleting data: {}'.format(self._array_dict[metric][count]))
             # check the count value includes the sw_size and is incremented in the correct place
             self._array_dict[metric] = np.delete(array, count)
 
