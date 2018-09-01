@@ -66,7 +66,11 @@ class PacketStatistics:
         # the current packet and self. variables to determine the probability assignment.
 
         sorted_data = np.sort(self._data)
+        # print('sorted data is: {}'.format(sorted_data))
+        # print('length of sorted data is: {}'.format(len(sorted_data)))
         self._lower_quart = sorted_data[int((self._sw + 1) / 4)]
+        # print('lower quartile is: {}'.format(self._lower_quart))
+
         self._upper_quart = sorted_data[int(3 * ((self._sw + 1) / 4))]
         self._inter_quart_range = int(self._upper_quart - self._lower_quart)
         # print(self._lower_quart, self._upper_quart, self._inter_quart_range)
