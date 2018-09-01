@@ -180,34 +180,15 @@ def oo_function(metric_dict, select_metrics, sw_val):
     for metric, metric_array in zip(features_to_analyse, metric_dict.values()):
         sw_dict[metric] = metric_array[0:sw_val]
 
-    print(sw_dict)
+    # print(sw_dict)
 
     # create dynamic instances of AutoBPA class
     instance_dict = inst_bpa.create_instance(features_to_analyse,
                                              sw_dict, sw_val)
 
-    # function variables
-    start, stop, step = sw_val, len(metric_dict['RSSI']), 1
-    pkt_count = 0
-    attack_count = 0
-
     pa = PacketAnalysis(array_dict=metric_dict, sw_dict=sw_dict,
-                        sw_val=sw_val, features_to_analyse=features_to_analyse,
-                        instance_dict=instance_dict, pkt_count=pkt_count,
-                        attack_count=attack_count)
+                        sw_val=sw_val, features_to_analyse=features_to_analyse)
 
-    # print(metric_dict['RSSI'][30])  # this is start value
+    pa.process_packets()
 
-    print('The first 0->29 packets are used '
-          'to develop the normal network behaviour.')
-
-    for incr in range(start, stop, step):
-        print('Packet number {}'.format(pkt_count))
-        MF_list = []
-        # for array, inst in zip(metric_dict.items(), instance_dict.items()):
-        #     data_val = array[1][incr]
-        #     inst_auto_bpa = instance_dict[inst[0]]
-
-        pa.process_packets(ds_inst, inst_bpa, incr)
-
-        # pkt_count += 1
+    # pkt_count += 1
