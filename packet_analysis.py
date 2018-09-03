@@ -6,6 +6,9 @@ from autobpa import AutoBPA
 
 
 class PacketAnalysis:
+    """
+
+    """
 
     def __init__(self, array_dict, sw_dict, sw_val, features_to_analyse, **kwargs):
         self._array_dict = array_dict
@@ -14,6 +17,10 @@ class PacketAnalysis:
         self._features_to_analyse = features_to_analyse
 
     def process_packets(self):
+        """
+
+        :return:
+        """
         ds = DempsterShafer()
         inst_bpa = AutoBPA
         print(inst_bpa)
@@ -25,7 +32,7 @@ class PacketAnalysis:
         start, stop, step = self._sw_val + 1, len(self._array_dict['RSSI']), 1
         pkt_count = 0
         attack_count = 0
-        incr = 30
+        incr = self._sw_val
         print(len(self._array_dict['RSSI']))
         # consider trying to multithread/multiprocess this secion, or use itertools to speed up the process.
         # potentially use itertools.product and dict.keys(), dict.values(), dict.items() to loop through them all
@@ -103,10 +110,15 @@ class PacketAnalysis:
             # pkt_count += 1
             #print('Incr value is: {}, '
                   #'pkt_count value is: {}'.format(incr, pkt_count))
-        print(attack_count)
+        print('Number of malicious frames detected: {} '.format(attack_count))
         # print(inst_bpa)
 
     def sliding_window(self, incr):
+        """
+
+        :param incr:
+        :return:
+        """
         # for x in range(start_value, stop=(len(metric_array)-window_size), step=1):
         # print(start_value + self._sw_val)
         # print(len((self._array_dict['RSSI'])))
@@ -123,6 +135,11 @@ class PacketAnalysis:
         # return self._sw_dict
 
     def delete_frame_data(self, count):
+        """
+
+        :param count:
+        :return:
+        """
         # print('ATTACK detected in packet {}. Closing web browser!'.format(count))
         for metric, array in self._array_dict.items():
             print('Deleting data: {}'.format(self._array_dict[metric][count]))

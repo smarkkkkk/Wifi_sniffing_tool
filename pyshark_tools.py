@@ -3,12 +3,20 @@ import numpy as np
 
 
 class PysharkTools:
+    """
+
+    """
     # def __init__(self, **kwargs):
     #     if 'filename' in kwargs: self._pcap_fn = kwargs['filename']
     # if 'mean' in kwargs: self._mean = kwargs['mean']
 
     @staticmethod
     def filter_packets(pcap_fn):
+        """
+
+        :param pcap_fn:
+        :return:
+        """
         pkt_list = pyshark.FileCapture(pcap_fn, display_filter='(wlan.sa==00:25:9c:cf:8a:73 || '
                                                                'wlan.sa==00:25:9c:cf:8a:71) && '
                                                                '(wlan.da==40:c3:36:07:d4:bf || '
@@ -18,6 +26,11 @@ class PysharkTools:
 
     @staticmethod
     def extract_data(filtered_packets):
+        """
+
+        :param filtered_packets:
+        :return:
+        """
         # Initialise empty lists for packet features
         dbm_antsignal = []  # Received Signal Strength Indication RSSI
         datarate = []
@@ -63,12 +76,17 @@ class PysharkTools:
 
     @staticmethod
     def live_capture():
+        """
+
+        :return:
+        """
         # may need to change interface string depending on what monitor mode interface appears from airmon-ng command
         capture = pyshark.LiveCapture(interface='wlan0mon', display_filter='(wlan.sa==00:25:9c:cf:8a:73 || '
                                                                            'wlan.sa==00:25:9c:cf:8a:71)'
                                                                            '&&(wlan.da==40:c3:36:07:d4:bf||'
                                                                            'wlan.da==ff:ff:ff:ff:ff:ff)'
                                                                            '&&!(wlan.fc.type==0)&&tcp')
-
-        for pkt in capture.sniff_continuously(packet_count=200):
+        # for pkt in capture.sniff(packet_count=0):
+        #     print(pkt.radiotap.dbm_antsignal, pkt.radiotap.datarate, pkt.wlan.duration, pkt.wlan.seq, pkt.ip.ttl)
+        for pkt in capture.sniff_continuously(packet_count=0):
             print(pkt.radiotap.dbm_antsignal, pkt.radiotap.datarate, pkt.wlan.duration, pkt.wlan.seq, pkt.ip.ttl)

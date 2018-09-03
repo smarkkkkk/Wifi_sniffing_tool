@@ -48,11 +48,11 @@ if __name__ == "__main__":
 
     # ensure sliding window value is an integer
     if args.sliding_window:
-        sw_val = args.sliding_window
+        sw_val = int(args.sliding_window)
         # print(sw_val)
         # print(isinstance(sw_val, int))
-        if not isinstance(sw_val, int):
-            raise ValueError('Sliding window value must be an integer, (e.g. 10, 30, 50, 100)')
+        # if not isinstance(sw_val, int):
+        #     raise ValueError('Sliding window value must be an integer, (e.g. 10, 30, 50, 100)')
 
     # assign cmd line arguments to program variables
     if args.output_file:

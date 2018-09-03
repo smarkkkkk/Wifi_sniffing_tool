@@ -5,6 +5,9 @@ import numpy as np
 # PacketStatistics needs the sw_val for the box plot function.
 # Pass in as initialising variable like local binary patterns function for project
 class PacketStatistics:
+    """
+
+    """
     # may need to set __init__ up as **kwargs to ensure that the median,
     # and quartile values are not required
     # when initiating the class
@@ -27,6 +30,10 @@ class PacketStatistics:
 
     # These functions are called methods in Python classes
     def mean(self):
+        """
+
+        :return:
+        """
         self._mean = statistics.mean(self._data)
         # print('SW data being analysed is: {}'.format(self._data))
         # print('Mean value is: {}'.format(self._mean))
@@ -34,13 +41,25 @@ class PacketStatistics:
 
     # Frequency is mode in this program
     def frequency(self):
+        """
+
+        :return:
+        """
         return statistics.mode(self._data)
 
     def median(self):
+        """
+
+        :return:
+        """
         self._median = statistics.median(self._data)
 
     def distance(self, new_val):
+        """
 
+        :param new_val:
+        :return:
+        """
         if abs(min(self._data) - self._mean) >= abs(self._mean - max(self._data)):
             self._dist_maxval = abs(min(self._data) - self._mean)
             # print('smaller')
@@ -61,6 +80,10 @@ class PacketStatistics:
         # print('Dist_mean is: {}. Dist_maxval is : {}'.format(self._dist_mean, self._dist_maxval))
 
     def box_plot(self):
+        """
+
+        :return:
+        """
         # produces the quartiles and stores them in self.variable_name
         # autoBPA will inherit from the statistics class and therefore will have access to
         # the quartile values through the self.__init__ inheritance thing. AutoBPA will use

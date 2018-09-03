@@ -2,6 +2,9 @@ from packetstatistics import PacketStatistics
 
 
 class AutoBPA(PacketStatistics):
+    """
+
+    """
     # alf = 0
 
     # Putting new variables before kwargs seems to be allowed.
@@ -16,6 +19,11 @@ class AutoBPA(PacketStatistics):
         if 'adjustment_factor' in kwargs: self._adjust_bpa = kwargs['adjustment_factor']
 
     def normal(self, value):
+        """
+
+        :param value:
+        :return:
+        """
         # This will use quartiles from a box and whisker plot in PacketStatistics
         # to assign a BPA for normal based on the metric value
         min_val = self._lower_quart - (1.5 * self._inter_quart_range)
@@ -30,6 +38,10 @@ class AutoBPA(PacketStatistics):
         return self._normal_bpa
 
     def attack(self):
+        """
+
+        :return:
+        """
         # Euclidean distance of current value from reference point and reference to max value
         self._attack_bpa = (self._dist_mean * 0.5) / self._dist_maxval
         # print(self._dist_mean, self._dist_maxval, self._attack_bpa)
@@ -39,6 +51,10 @@ class AutoBPA(PacketStatistics):
         return self._attack_bpa
 
     def uncertainty(self):
+        """
+
+        :return:
+        """
         # Min of N and A divided by Max of N and A
         if self._normal_bpa > self._attack_bpa:
             min_bpa = self._attack_bpa
@@ -54,6 +70,10 @@ class AutoBPA(PacketStatistics):
         return self._uncertainty_bpa
 
     def adjustment_factor(self):
+        """
+
+        :return:
+        """
         # Calculate the adjustment factor to be applied to each bpa
         self._adjust_bpa = ((self._normal_bpa + self._attack_bpa + self._uncertainty_bpa) - 1) / 3
         n_phi = self._normal_bpa /(self._normal_bpa + self._attack_bpa + self._uncertainty_bpa)
@@ -62,6 +82,11 @@ class AutoBPA(PacketStatistics):
         return self._adjust_bpa, n_phi, a_phi, u_phi
 
     def combined_value(self, value):
+        """
+
+        :param value:
+        :return:
+        """
         ds_dict = {}
 
         n = self.normal(value)
@@ -82,6 +107,13 @@ class AutoBPA(PacketStatistics):
 
     @classmethod
     def create_instance(cls, features_to_analyse, sw_dict, sw_size):
+        """
+
+        :param features_to_analyse:
+        :param sw_dict:
+        :param sw_size:
+        :return:
+        """
         instance_dict = {}
 
         # create an instance of each feature that is going to be analysed
@@ -95,8 +127,8 @@ class AutoBPA(PacketStatistics):
             #       'The Feature is : {}'.format(name, feature))
             # print(sw_dict_iter[1])
             # print(len(sw_dict_iter[1]))
-            if len(sw_dict_iter[1]) != 30:
-                print('sw_dict metric array data inside create_instance function: {}'.format(sw_dict_iter[1]))
+            #if len(sw_dict_iter[1]) != 30:
+                #print('sw_dict metric array data inside create_instance function: {}'.format(sw_dict_iter[1]))
             # creates an instance of AutoBPA class
             # instance = globals()[name] = AutoBPA(data=sw_dict_iter[1], sw=sw_size)
             # instance_dict[sw_dict_iter[0]] = instance
