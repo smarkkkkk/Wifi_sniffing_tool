@@ -95,12 +95,13 @@ class AutoBPA(PacketStatistics):
             #       'The Feature is : {}'.format(name, feature))
             # print(sw_dict_iter[1])
             # print(len(sw_dict_iter[1]))
-
+            if len(sw_dict_iter[1]) != 30:
+                print('sw_dict metric array data inside create_instance function: {}'.format(sw_dict_iter[1]))
             # creates an instance of AutoBPA class
             # instance = globals()[name] = AutoBPA(data=sw_dict_iter[1], sw=sw_size)
             # instance_dict[sw_dict_iter[0]] = instance
             # print('sw_dict metric array data inside create_instance function: {}'.format(sw_dict_iter[1]))
             instance_dict[sw_dict_iter[0]] = AutoBPA(data=sw_dict_iter[1], sw=sw_size)
-
+        ttl_array = sw_dict['TTL']
         # print(instance_dict)
-        return instance_dict
+        return instance_dict, ttl_array

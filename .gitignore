@@ -9,3 +9,4 @@ testing_stats_bpa.py
 sw_dict_testing.txt
 testing_mean.txt
 testing_sw_dict.txt
+*.pyc

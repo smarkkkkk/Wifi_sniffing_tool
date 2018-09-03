@@ -28,6 +28,7 @@ class PacketStatistics:
     # These functions are called methods in Python classes
     def mean(self):
         self._mean = statistics.mean(self._data)
+        # print('SW data being analysed is: {}'.format(self._data))
         # print('Mean value is: {}'.format(self._mean))
         return self._mean
 

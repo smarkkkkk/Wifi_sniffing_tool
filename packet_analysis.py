@@ -19,13 +19,13 @@ class PacketAnalysis:
         print(inst_bpa)
 
         # create dyanmic instances of AutoBPA class
-        instance_dict = inst_bpa.create_instance(self._features_to_analyse,
-                                                 self._sw_dict, self._sw_val)
+        instance_dict, ttl_array = inst_bpa.create_instance(self._features_to_analyse,
+                                                            self._sw_dict, self._sw_val)
         # function variables
         start, stop, step = self._sw_val + 1, len(self._array_dict['RSSI']), 1
         pkt_count = 0
         attack_count = 0
-        incr = 0
+        incr = 30
         print(len(self._array_dict['RSSI']))
         # consider trying to multithread/multiprocess this secion, or use itertools to speed up the process.
         # potentially use itertools.product and dict.keys(), dict.values(), dict.items() to loop through them all
@@ -37,9 +37,9 @@ class PacketAnalysis:
             # not going to process
             data_list = []
             MF_list = []
-            # print('Packet number {}'.format(pkt_count))
-            print('sw_dict inside packet processing: {}'.format(self._sw_dict))
-            print('\n\n')
+            print('Packet number {}'.format(pkt_count))
+            # print('sw_dict inside packet processing: {}'.format(self._sw_dict))
+            # print('\n\n')
             for array, inst in zip(self._array_dict.items(), instance_dict.items()):
 
                 data_list.append(array[1][incr])
@@ -59,7 +59,7 @@ class PacketAnalysis:
                 # append all metrics to list except the last one
                 if not len(MF_list) == (len(self._features_to_analyse) - 1):
                     MF_list.append(m)
-
+            # print(data_list)
             # Combine all the mass functions into one result for N, A, U
             result = ds.fuse_metrics(m, MF_list)
 
@@ -68,29 +68,37 @@ class PacketAnalysis:
 
             if 'n' in bpa_result:
                 # print(self._sw_dict)
-                print('self._sw_dict before sliding_window function: {}'.format(self._sw_dict))
-                print('\n\n')
+                # print('self._sw_dict before sliding_window function: {}'.format(self._sw_dict))
+                # print('\n\n')
                 self.sliding_window(incr)
-                print('self._sw_dict after sliding_window function: {}'.format(self._sw_dict))
-                print('\n\n')
-                instance_dict = inst_bpa.create_instance(self._features_to_analyse,
+                # print('self._sw_dict after sliding_window function: {}'.format(self._sw_dict))
+                # print('\n\n')
+                instance_dict, ttl_array = inst_bpa.create_instance(self._features_to_analyse,
                                                          self._sw_dict, self._sw_val)
-                print('self._sw_dict after new AutoBPA instances created function: {}'.format(self._sw_dict))
-                print('\n\n')
+                # print('self._sw_dict after new AutoBPA instances created function: {}'.format(self._sw_dict))
+                # print('\n\n')
                 # print(instance_dict)
                 # print(self._sw_dict)
+                # print(np.setdiff1d(self._sw_dict['TTL'], ttl_array))
                 pkt_count += 1
                 incr += 1
             elif 'a' in bpa_result:
                 attack_count += 1
                 print('ATTACK detected in packet {}. Closing web browser!'.format(pkt_count))
                 # print('Data that needs to be deleted: {}'.format(data_list))
+                # print(self._array_dict['RSSI'][(incr - 5):(incr + 5)])
                 self.delete_frame_data(incr)
                 pkt_count += 1
+                # print(self._array_dict['RSSI'][(incr-5):(incr+5)])
             elif 'u' in bpa_result:
                 pass
             else:
                 pass
+
+            # if pkt_count == 700:
+            #     break
+
+            # print('\n\n')
             # incr += 1
             # pkt_count += 1
             #print('Incr value is: {}, '
@@ -98,15 +106,17 @@ class PacketAnalysis:
         print(attack_count)
         # print(inst_bpa)
 
-    def sliding_window(self, start_value):
+    def sliding_window(self, incr):
         # for x in range(start_value, stop=(len(metric_array)-window_size), step=1):
         # print(start_value + self._sw_val)
         # print(len((self._array_dict['RSSI'])))
-        if (start_value + self._sw_val) < len((self._array_dict['RSSI'])):
+        start_val = incr - self._sw_val
+        end_val = incr
+        if end_val < len((self._array_dict['RSSI'])):
             for norm_arrays, sw_arrays in zip(self._array_dict.values(), self._sw_dict.items()):
                 # print(start_value, (start_value+self._sw_val))
                 # print(self._sw_dict[sw_arrays[0]])
-                self._sw_dict[sw_arrays[0]] = norm_arrays[start_value:(start_value + self._sw_val)]
+                self._sw_dict[sw_arrays[0]] = norm_arrays[start_val:incr]
                 # print(self._sw_dict[sw_arrays[0]])
         else:
             print('Sliding window can no longer be implemented due to end of frames approaching!')
@@ -115,10 +125,11 @@ class PacketAnalysis:
     def delete_frame_data(self, count):
         # print('ATTACK detected in packet {}. Closing web browser!'.format(count))
         for metric, array in self._array_dict.items():
-            # print('Deleting data: {}'.format(self._array_dict[metric][count]))
+            print('Deleting data: {}'.format(self._array_dict[metric][count]))
+            # print(self._array_dict[metric][(count - 5):(count + 5)])
             # check the count value includes the sw_size and is incremented in the correct place
             self._array_dict[metric] = np.delete(array, count)
-
+            # print(self._array_dict[metric][(count-5):(count+5)])
         # return self._array_dict
 
     # def list_to_array(self, lists):

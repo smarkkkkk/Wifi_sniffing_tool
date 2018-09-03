@@ -28,11 +28,11 @@ class PysharkTools:
         # Extract all data from packets into lists.
         # This loop is the bottleneck, investigate ways to speed it up. 11.6 seconds to process the normal pcap file
         for pkt in filtered_packets:
-            dbm_antsignal.append(int(pkt.radiotap.dbm_antsignal))
-            datarate.append(int(pkt.radiotap.datarate))
-            duration.append(int(pkt.wlan.duration))
-            seq.append(int(pkt.wlan.seq))
-            ttl.append(int(pkt.ip.ttl))
+            dbm_antsignal.append(float(pkt.radiotap.dbm_antsignal))
+            datarate.append(float(pkt.radiotap.datarate))
+            duration.append(float(pkt.wlan.duration))
+            seq.append(float(pkt.wlan.seq))
+            ttl.append(float(pkt.ip.ttl))
 
         # Convert all packet feature lists to numpy arrays
         dbm_antsignal = np.asarray(dbm_antsignal)
