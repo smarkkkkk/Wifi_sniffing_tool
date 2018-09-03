@@ -99,7 +99,7 @@ class AutoBPA(PacketStatistics):
             # creates an instance of AutoBPA class
             # instance = globals()[name] = AutoBPA(data=sw_dict_iter[1], sw=sw_size)
             # instance_dict[sw_dict_iter[0]] = instance
-            print(sw_dict_iter[1])
+            # print('sw_dict metric array data inside create_instance function: {}'.format(sw_dict_iter[1]))
             instance_dict[sw_dict_iter[0]] = AutoBPA(data=sw_dict_iter[1], sw=sw_size)
 
         # print(instance_dict)

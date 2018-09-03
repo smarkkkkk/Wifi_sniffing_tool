@@ -38,15 +38,17 @@ class PacketAnalysis:
             data_list = []
             MF_list = []
             # print('Packet number {}'.format(pkt_count))
+            print('sw_dict inside packet processing: {}'.format(self._sw_dict))
+            print('\n\n')
             for array, inst in zip(self._array_dict.items(), instance_dict.items()):
 
                 data_list.append(array[1][incr])
 
                 # print('Metric: {}, value: {}'.format(inst[0],array[1][incr]))
-                instance_dict[inst[0]].mean()
+                mean = instance_dict[inst[0]].mean()
                 instance_dict[inst[0]].distance(array[1][incr])
                 instance_dict[inst[0]].box_plot()
-
+                # print('Metric: {}, mean: {}'.format(inst[0], mean))
                 # N, A, U (BPA) are returned in a dictionary
                 # that can be inputted into MF class
                 ds_dict = instance_dict[inst[0]].combined_value(value=array[1][incr])
@@ -66,9 +68,15 @@ class PacketAnalysis:
 
             if 'n' in bpa_result:
                 # print(self._sw_dict)
+                print('self._sw_dict before sliding_window function: {}'.format(self._sw_dict))
+                print('\n\n')
                 self.sliding_window(incr)
+                print('self._sw_dict after sliding_window function: {}'.format(self._sw_dict))
+                print('\n\n')
                 instance_dict = inst_bpa.create_instance(self._features_to_analyse,
                                                          self._sw_dict, self._sw_val)
+                print('self._sw_dict after new AutoBPA instances created function: {}'.format(self._sw_dict))
+                print('\n\n')
                 # print(instance_dict)
                 # print(self._sw_dict)
                 pkt_count += 1
@@ -88,7 +96,7 @@ class PacketAnalysis:
             #print('Incr value is: {}, '
                   #'pkt_count value is: {}'.format(incr, pkt_count))
         print(attack_count)
-        print(inst_bpa)
+        # print(inst_bpa)
 
     def sliding_window(self, start_value):
         # for x in range(start_value, stop=(len(metric_array)-window_size), step=1):
