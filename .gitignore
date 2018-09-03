@@ -6,3 +6,6 @@ __pycache__/
 .*
 testing_stats_bpa.py
 #/pyds
+sw_dict_testing.txt
+testing_mean.txt
+testing_sw_dict.txt
