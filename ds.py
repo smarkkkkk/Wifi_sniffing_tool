@@ -2,10 +2,19 @@ from pyds.pyds import MassFunction
 
 
 class DempsterShafer:
+    """
+    This class is used to handle all Dempster Shafer functionality, mainly, processing the result of
+    MassFunctions from the pyds module and fusing the metrics.
+    """
 
     @staticmethod
     def process_ds(frozen_mass_func):
-        # list_mass_func = list(frozen_mass_func.items())
+        """
+        This function processes the fused metrics into a format of N, A, U.
+
+        :param frozen_mass_func: frozenset containing all combinations of N, A, U for the fuse
+        :return: ds_dict: dictionary containing N, A, U for the fuse
+        """
 
         ds_dict = {}
 
@@ -18,6 +27,14 @@ class DempsterShafer:
         return ds_dict
 
     def fuse_metrics(self, m_last, mf_list):
+        """
+        This function processes a list of MassFunctions (one for each metric) and fuses them using
+        combine_disjunctive from the pyds module to produce the N, A, U probability for the metric fuse
+
+        :param m_last: the MassFunction of the last metric
+        :param mf_list: list containing MassFunctions for every other metric
+        :return: m: final N, A, U dictionary containing final probabilities for fused metrics
+        """
         count = 0
         for m_list in mf_list:
 
@@ -32,11 +49,15 @@ class DempsterShafer:
             # elif count == len(MF_list):
             #     return m
             else:
+                # print(m_list)
                 # print('Last m is: {}, the first m in list is: {}'.format(m, m_list))
                 result = m.combine_disjunctive(m_list)
-                # print(result)
+                # print('Unprocessed Result: {}'.format(result))
                 result = self.process_ds(result)
+                # print('Processed Result: {}'.format(result))
                 m = MassFunction(result)
+                # print('m inside loop: {}'.format(m))
                 # print(m)
                 count += 1
+        # print('MassFunction being returned: {}'.format(m))
         return m
