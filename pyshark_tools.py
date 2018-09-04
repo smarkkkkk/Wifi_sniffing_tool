@@ -11,7 +11,7 @@ class PysharkTools:
     # if 'mean' in kwargs: self._mean = kwargs['mean']
 
     @staticmethod
-    def filter_packets(pcap_fn):
+    def filter_packets(pcap_fn, disp_filter):
         """
         This function filters the packets inside the pcap file. The filter to be applied is in 'Wireshark'
         format and can be set from the cmd line argument.
@@ -20,11 +20,7 @@ class PysharkTools:
         :param filter: filter to be applied
         :return: pkt_list: list of filtered packets
         """
-        pkt_list = pyshark.FileCapture(pcap_fn, display_filter='(wlan.sa==00:25:9c:cf:8a:73 || '
-                                                               'wlan.sa==00:25:9c:cf:8a:71) && '
-                                                               '(wlan.da==40:c3:36:07:d4:bf || '
-                                                               'wlan.da==ff:ff:ff:ff:ff:ff) &&!'
-                                                               '(wlan.fc.type==0) && tcp')
+        pkt_list = pyshark.FileCapture(pcap_fn, display_filter=disp_filter)
         return pkt_list
 
     @staticmethod
@@ -81,7 +77,7 @@ class PysharkTools:
         return dbm_antsignal, datarate, duration, seq, ttl, metric_dict
 
     @staticmethod
-    def live_capture():
+    def live_capture(mon_interface, disp_filter):
         """
         This function is for online use of the program. It uses PyShark to continuously sniff packets on the
         interface set and applying a filter as specified from the cmd line. It will then process the packet
@@ -89,11 +85,7 @@ class PysharkTools:
         :return:
         """
         # may need to change interface string depending on what monitor mode interface appears from airmon-ng command
-        capture = pyshark.LiveCapture(interface='wlan0mon', display_filter='(wlan.sa==00:25:9c:cf:8a:73 || '
-                                                                           'wlan.sa==00:25:9c:cf:8a:71)'
-                                                                           '&&(wlan.da==40:c3:36:07:d4:bf||'
-                                                                           'wlan.da==ff:ff:ff:ff:ff:ff)'
-                                                                           '&&!(wlan.fc.type==0)&&tcp')
+        capture = pyshark.LiveCapture(interface=mon_interface, display_filter=disp_filter)
         # for pkt in capture.sniff(packet_count=0):
         #     print(pkt.radiotap.dbm_antsignal, pkt.radiotap.datarate, pkt.wlan.duration, pkt.wlan.seq, pkt.ip.ttl)
         for pkt in capture.sniff_continuously(packet_count=0):
