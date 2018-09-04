@@ -1,38 +1,47 @@
-import argparse # , statistics, itertools, os, time
-import numpy as np
-# import traceback
+"""
+Author: Jim Matthews
+Contact email: j.matthews-14@student.lboro.ac.uk
+Supervisor: Dr Kostas Kyriakopoulos, Signal Processing and Networks Research Group, Loughborough University
+Group URL: http://www.lboro.ac.uk/departments/meme/research/research-groups/signal-processing-networks/
+Date: 4th September 2018
+This work was carried out as part of a Wolfson School of Mechanical, Electrical and Manufacturing
+Engineering funded summary bursary.
+"""
+
+import argparse
 from scapy.all import *
-from autobpa import AutoBPA
-from packetstatistics import PacketStatistics
 from select_metrics import SelectMetrics
 import feature_analysis
 from pyshark_tools import PysharkTools
 
 
-if __name__ == "__main__":
+def main():
     """
-    Five metrics will be collated to give evidence of an attack. The metrics identified are: Received Signal Strength 
+    Five metrics will be collated to give evidence of an attack. The metrics identified are: Received Signal Strength
     Indication (RSSI), Transmission (or injection) Rate, Frame Sequence number, Duration field (or Network Allocation
-    Vector, NAV) and Time To Live (TTL). 
-    
+    Vector, NAV) and Time To Live (TTL).
+
     In this program these metrics have the following variable names -->
-    
+
     RSSI --> dbm_Antsignal
     Rate --> datarate
     Seq -- > Seq
     NAV --> duration
     TTL --> ttl
-    """
 
+    Dempster Shafer will be applied on the metrics to produce a belief in Normal, Attack, and Uncertainty
+    If the frame is malicious, i.e. Attack, the web browser is shut down. If the frame is Normal then the frame data is
+    added to the sliding window that produces the 'normal' network behaviour.
+    """
     # Default settings
     input_file = '/pcap_files/variable_rate_normal_mon_VP'
     output_file = 'data.csv'
     sw_val = 30
     select_metrics = 31
     capture_filter = '(wlan.sa==00:25:9c:cf:8a:73 || ' \
-                     'wlan.sa==00:25:9c:cf:8a:71) &&'  \
+                     'wlan.sa==00:25:9c:cf:8a:71) &&' \
                      '(wlan.da==40:c3:36:07:d4:bf || ' \
-                     'wlan.da==ff:ff:ff:ff:ff:ff) '    \
+                     'wlan.da==ff:ff:ff:ff:ff:ff) ' \
                      '&&!(wlan.fc.type==0)&&tcp'
 
     interface = 'mon0'
@@ -77,7 +86,10 @@ if __name__ == "__main__":
         input_file_FLAG = False
     if args.features:
         select_metrics = args.features
-
+    if args.ds_time:
+        ds_timer = args.ds_time
+    else:
+        ds_timer = False
     # begin either online sniffing or loading from pcap file
     try:
         metric_1 = SelectMetrics(metric_val=select_metrics)
@@ -96,12 +108,14 @@ if __name__ == "__main__":
             if os.path.exists(pcap_file) is False:
                 raise FileNotFoundError()
 
-            print('About to start filtering packets...\n')
+            if args.quiet is False:
+                print('About to start filtering packets...\n')
             #  Call function to filter all packets.
             pkt_list = py_shark.filter_packets(pcap_file)
 
-            print('All packets filtered. \n'
-                  'Data is now being extracted from packets... \n')
+            if args.quiet is False:
+                print('All packets filtered. \n'
+                      'Data is now being extracted from packets... \n')
 
             # Call function to extract relevant data from packets.
             dbm_antsignal, datarate, duration, seq, ttl, metric_dict = py_shark.extract_data(pkt_list)
@@ -109,8 +123,9 @@ if __name__ == "__main__":
             # when extract_data is updated the new PacketAnalysis class will
             # only need metric_dict to work correctly
             # metric_dict = py_shark.extract_data(pkt_list)
-
-            feature_analysis.oo_function(metric_dict, select_metrics, sw_val)
+            # calls function to process packets, calc. DS and
+            # fuse metrics producing N, A, U for each frame
+            feature_analysis.oo_function(metric_dict, select_metrics, sw_val, ds_timer)
 
             # feature_analysis.metric_analysis(dbm_antsignal, datarate, duration, seq, ttl, sw_val, select_metrics)
 
@@ -118,7 +133,8 @@ if __name__ == "__main__":
             #                                                           duration, seq, ttl, sw_val)
             #
             # packet_analysis(array_dict, ave_dict, sw_dict, sw_val)
-            print('Program finished without error.\n')
+            if args.quiet is False:
+                print('Program finished without error.\n')
 
         elif args.online is True and input_file_FLAG is True:
             raise IndexError()
@@ -128,9 +144,15 @@ if __name__ == "__main__":
     except FileNotFoundError:
         print('FileNotFoundError: file or directory does not exist.')
     # except ValueError:
-        # print('ValueError: --features must be an integer between 1 and 31, see "select_metrics.txt" for help.')
+    # print('ValueError: --features must be an integer between 1 and 31, see "select_metrics.txt" for help.')
     except:
         print(traceback.format_exc())
 
     finally:
-        print('Exiting program!')
+        if args.quiet is False:
+            print('Exiting program!')
+
+
+if __name__ == "__main__":
+    main()
+
