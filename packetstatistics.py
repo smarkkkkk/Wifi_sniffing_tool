@@ -6,7 +6,8 @@ import numpy as np
 # Pass in as initialising variable like local binary patterns function for project
 class PacketStatistics:
     """
-
+    This class contains functions that apply some statistical method on data, such as: mean, mode, median,
+    euclidean distance and box plot. It is also the parent class of AutoBPA.
     """
     # may need to set __init__ up as **kwargs to ensure that the median,
     # and quartile values are not required
@@ -28,36 +29,36 @@ class PacketStatistics:
         if 'upper_quart' in kwargs: self._upper_quart = kwargs['upper_quart']
         if 'inter_quart_range' in kwargs: self._inter_quart_range = kwargs['inter_quart_range']
 
-    # These functions are called methods in Python classes
     def mean(self):
         """
-
-        :return:
+        This function calculates the mean of a data set.
+        :return: self._mean
         """
         self._mean = statistics.mean(self._data)
         # print('SW data being analysed is: {}'.format(self._data))
         # print('Mean value is: {}'.format(self._mean))
         return self._mean
 
-    # Frequency is mode in this program
     def frequency(self):
         """
-
-        :return:
+        This function calculates the mode of a data set.
+        :return: mode
         """
         return statistics.mode(self._data)
 
     def median(self):
         """
-
+        This function calculates the median of a data set.
         :return:
         """
         self._median = statistics.median(self._data)
 
     def distance(self, new_val):
         """
+        This function calculates the euclidean distance from a defined reference of normality, in this case
+        the mean to the current data point and the max of the data.
 
-        :param new_val:
+        :param new_val: current value being analysed
         :return:
         """
         if abs(min(self._data) - self._mean) >= abs(self._mean - max(self._data)):
@@ -77,10 +78,10 @@ class PacketStatistics:
         # if self._dist_mean == 0:
         #     self._dist_mean = 0.01
 
-        # print('Dist_mean is: {}. Dist_maxval is : {}'.format(self._dist_mean, self._dist_maxval))
-
     def box_plot(self):
         """
+        This function calculates the box plot quartiles of the data set, i.e. lower quartile (LQ),
+        upper quartile (UQ) and inter-quartile range (IQR)
 
         :return:
         """
