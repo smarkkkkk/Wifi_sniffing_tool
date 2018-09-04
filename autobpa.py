@@ -1,4 +1,6 @@
 from packetstatistics import PacketStatistics
+import numpy as np
+import math
 
 
 class AutoBPA(PacketStatistics):
@@ -32,12 +34,26 @@ class AutoBPA(PacketStatistics):
         min_val = self._lower_quart - (1.5 * self._inter_quart_range)
         max_val = self._upper_quart + (1.5 * self._inter_quart_range)
 
-        if self._lower_quart < value < self._upper_quart:
+        if value == self._mean:
+            self._normal_bpa = 0.5
+        elif self._lower_quart <= value or value <= self._upper_quart:
             self._normal_bpa = 0.4
         elif min_val < value < self._lower_quart or self._upper_quart < value < max_val:
                 self._normal_bpa = 0.3
         else:
             self._normal_bpa = 0.15
+
+        # if value is self._mean:
+        #     self._normal_bpa = 0.8
+        # print(self._normal_bpa)
+
+        # prev_norm = self._normal_bpa
+        #
+        # if math.isnan(self._normal_bpa):
+        #     self._normal_bpa = 0.5
+        #     print('normal has been reassigned')
+        #           '{}'
+        #           '{}'.format(prev_norm, self._normal_bpa))
         return self._normal_bpa
 
     def attack(self):
@@ -52,8 +68,19 @@ class AutoBPA(PacketStatistics):
         # Euclidean distance of current value from reference point and reference to max value
         self._attack_bpa = (self._dist_mean * 0.5) / self._dist_maxval
         # print(self._dist_mean, self._dist_maxval, self._attack_bpa)
+
+        # if self._attack_bpa is np.nan:
+        #     self._attack_bpa = 0.2
+
         if self._attack_bpa > 0.5:
             self._attack_bpa = 0.5
+
+        # prev_attack = self._attack_bpa
+        if math.isnan(self._attack_bpa):
+            self._attack_bpa = 0.000001
+        #     print('attack has been reassigned')
+        #     print(prev_attack)
+        #     print(self._attack_bpa)
 
         return self._attack_bpa
 
@@ -92,8 +119,9 @@ class AutoBPA(PacketStatistics):
         """
         # Calculate the adjustment factor to be applied to each bpa
         self._adjust_bpa = ((self._normal_bpa + self._attack_bpa + self._uncertainty_bpa) - 1) / 3
-        n_phi = self._normal_bpa /(self._normal_bpa + self._attack_bpa + self._uncertainty_bpa)
-        a_phi = self._attack_bpa /(self._normal_bpa + self._attack_bpa + self._uncertainty_bpa)
+
+        n_phi = self._normal_bpa / (self._normal_bpa + self._attack_bpa + self._uncertainty_bpa)
+        a_phi = self._attack_bpa / (self._normal_bpa + self._attack_bpa + self._uncertainty_bpa)
         u_phi = self._uncertainty_bpa /(self._normal_bpa + self._attack_bpa + self._uncertainty_bpa)
         return self._adjust_bpa, n_phi, a_phi, u_phi
 
@@ -112,7 +140,7 @@ class AutoBPA(PacketStatistics):
         u = self.uncertainty()
         phi, n_phi, a_phi, u_phi = self.adjustment_factor()
         # print(n, a, u)
-
+        print(n, a, u, phi)
         ds_dict['n'] = n - phi
         ds_dict['a'] = a - phi
         ds_dict['u'] = u - phi
@@ -129,7 +157,7 @@ class AutoBPA(PacketStatistics):
         This function is used to create instances of itself. This is necessary whenever the sliding window
         is updated with new data so that each metric has an instance of AutoBPA with its own data
         encapsulated inside the instance.
-        
+
         :param features_to_analyse: features that will be analysed
         :param sw_dict: dictionary containg the current sliding window for each metric
         :param sw_size: the size of the sliding window being applied, e.g. 20, 30, 50 ...
