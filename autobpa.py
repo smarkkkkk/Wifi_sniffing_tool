@@ -3,7 +3,8 @@ from packetstatistics import PacketStatistics
 
 class AutoBPA(PacketStatistics):
     """
-
+    This class calculates the Basic Probability Assignments (N, A, U) for each metric of each frame.
+    It is a child class of PacketStatistics.
     """
     # alf = 0
 
@@ -20,9 +21,11 @@ class AutoBPA(PacketStatistics):
 
     def normal(self, value):
         """
+        This function calculates a probability for Normal based on the location of the current data point
+        in relation to the box plot quartiles of the sliding window data for the metric.
 
-        :param value:
-        :return:
+        :param value: current data value being analysed
+        :return: self._normal_bpa: probability of normal
         """
         # This will use quartiles from a box and whisker plot in PacketStatistics
         # to assign a BPA for normal based on the metric value
@@ -39,8 +42,12 @@ class AutoBPA(PacketStatistics):
 
     def attack(self):
         """
+        This function calculates a probability for Attack based on the euclidean distance to the mean
+        and the max value in the current sliding window for the metric.
 
-        :return:
+        m(A) = (|D| * 0.5)/ |Dmax|
+
+        :return: self._attack_bpa: probability of attack
         """
         # Euclidean distance of current value from reference point and reference to max value
         self._attack_bpa = (self._dist_mean * 0.5) / self._dist_maxval
@@ -52,8 +59,12 @@ class AutoBPA(PacketStatistics):
 
     def uncertainty(self):
         """
+        This function calculates a probability for Uncertainty based on the probabilities for Normal and
+        Attack on the same data value for the metric.
 
-        :return:
+        m(N|A) = min(m(N), m(A)) / max(m(N), m(A))
+
+        :return: self._uncertainty_bpa: probability of uncertainty
         """
         # Min of N and A divided by Max of N and A
         if self._normal_bpa > self._attack_bpa:
@@ -71,8 +82,13 @@ class AutoBPA(PacketStatistics):
 
     def adjustment_factor(self):
         """
+        This function calculates the adjustment factor needed to make the sum of m(N), m(A), m(U) add to 1.
 
-        :return:
+        phi = sum(m(x)) - 1 / Z
+
+        Z is the number of different hypotheses, in this case 3 (N, A, U)
+
+        :return: self._adjust_bpa: value needed to take from each probability for the sum to add to 1
         """
         # Calculate the adjustment factor to be applied to each bpa
         self._adjust_bpa = ((self._normal_bpa + self._attack_bpa + self._uncertainty_bpa) - 1) / 3
@@ -83,9 +99,11 @@ class AutoBPA(PacketStatistics):
 
     def combined_value(self, value):
         """
+        This function calls each of normal, attack, uncertainty, adjustement_factor and returns a
+        normalised dictionary containing N, A, U.
 
-        :param value:
-        :return:
+        :param value: current data value
+        :return: ds_dict: dictionary containing normalised BPAs
         """
         ds_dict = {}
 
@@ -108,11 +126,14 @@ class AutoBPA(PacketStatistics):
     @classmethod
     def create_instance(cls, features_to_analyse, sw_dict, sw_size):
         """
-
-        :param features_to_analyse:
-        :param sw_dict:
-        :param sw_size:
-        :return:
+        This function is used to create instances of itself. This is necessary whenever the sliding window
+        is updated with new data so that each metric has an instance of AutoBPA with its own data
+        encapsulated inside the instance.
+        
+        :param features_to_analyse: features that will be analysed
+        :param sw_dict: dictionary containg the current sliding window for each metric
+        :param sw_size: the size of the sliding window being applied, e.g. 20, 30, 50 ...
+        :return: instance_dict: dictionary containing an new instance for each metric
         """
         instance_dict = {}
 
