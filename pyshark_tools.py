@@ -4,7 +4,7 @@ import numpy as np
 
 class PysharkTools:
     """
-
+    This class contains all PyShark functionality necessary for this program to run.
     """
     # def __init__(self, **kwargs):
     #     if 'filename' in kwargs: self._pcap_fn = kwargs['filename']
@@ -13,9 +13,12 @@ class PysharkTools:
     @staticmethod
     def filter_packets(pcap_fn):
         """
+        This function filters the packets inside the pcap file. The filter to be applied is in 'Wireshark'
+        format and can be set from the cmd line argument.
 
-        :param pcap_fn:
-        :return:
+        :param pcap_fn: pcap filename
+        :param filter: filter to be applied
+        :return: pkt_list: list of filtered packets
         """
         pkt_list = pyshark.FileCapture(pcap_fn, display_filter='(wlan.sa==00:25:9c:cf:8a:73 || '
                                                                'wlan.sa==00:25:9c:cf:8a:71) && '
@@ -27,9 +30,12 @@ class PysharkTools:
     @staticmethod
     def extract_data(filtered_packets):
         """
+        This function will extract the features from each of the packets. In this case we are extracting
+        RSSI, Rate, NAV, Seq and TTL into numpy arrays. All of the data is saved in a csv file for debugging
+        and future use.
 
         :param filtered_packets:
-        :return:
+        :return: dbm_antsignal, datarate, duration, seq, ttl, metric_dict
         """
         # Initialise empty lists for packet features
         dbm_antsignal = []  # Received Signal Strength Indication RSSI
@@ -77,7 +83,9 @@ class PysharkTools:
     @staticmethod
     def live_capture():
         """
-
+        This function is for online use of the program. It uses PyShark to continuously sniff packets on the
+        interface set and applying a filter as specified from the cmd line. It will then process the packet
+        data with DS and detect attacks.
         :return:
         """
         # may need to change interface string depending on what monitor mode interface appears from airmon-ng command
