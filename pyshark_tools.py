@@ -17,7 +17,7 @@ class PysharkTools:
         format and can be set from the cmd line argument.
 
         :param pcap_fn: pcap filename
-        :param filter: filter to be applied
+        :param disp_filter: filter to be applied
         :return: pkt_list: list of filtered packets
         """
         pkt_list = pyshark.FileCapture(pcap_fn, display_filter=disp_filter)
