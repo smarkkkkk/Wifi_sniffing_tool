@@ -167,7 +167,7 @@ def sliding_window(metric_array, window_size, start_value):
     return metric_array[start_value:(start_value+window_size)]
 
 
-def oo_function(metric_dict, select_metrics, sw_val):
+def oo_function(metric_dict, select_metrics, sw_val, ds_timer):
     ds_inst = DempsterShafer
     inst_bpa = AutoBPA
 
@@ -187,7 +187,8 @@ def oo_function(metric_dict, select_metrics, sw_val):
                                              sw_dict, sw_val)
 
     pa = PacketAnalysis(array_dict=metric_dict, sw_dict=sw_dict,
-                        sw_val=sw_val, features_to_analyse=features_to_analyse)
+                        sw_val=sw_val, features_to_analyse=features_to_analyse,
+                        ds_timer=ds_timer)
 
     pa.process_packets()
 
