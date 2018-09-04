@@ -38,13 +38,13 @@ def main():
     output_file = 'data.csv'
     sw_val = 30
     select_metrics = 31
-    capture_filter = '(wlan.sa==00:25:9c:cf:8a:73 || ' \
-                     'wlan.sa==00:25:9c:cf:8a:71) &&' \
-                     '(wlan.da==40:c3:36:07:d4:bf || ' \
-                     'wlan.da==ff:ff:ff:ff:ff:ff) ' \
-                     '&&!(wlan.fc.type==0)&&tcp'
+    display_filter = '(wlan.sa==00:25:9c:cf:8a:73 ||'  \
+             'wlan.sa==00:25:9c:cf:8a:71) &&'  \
+             '(wlan.da==40:c3:36:07:d4:bf ||'  \
+             'wlan.da==ff:ff:ff:ff:ff:ff) '    \
+             '&&!(wlan.fc.type==0)&&tcp'
 
-    interface = 'mon0'
+    mon_interface = 'mon0'
 
     # Initialise cmd line argument parser and flags
     ap = argparse.ArgumentParser()
@@ -90,6 +90,11 @@ def main():
         ds_timer = args.ds_time
     else:
         ds_timer = False
+    if args.capture_filter:
+        display_filter = str(args.capture_filter)
+    if args.interface:
+        mon_interface = str(args.interface)
+        
     # begin either online sniffing or loading from pcap file
     try:
         metric_1 = SelectMetrics(metric_val=select_metrics)
@@ -100,7 +105,7 @@ def main():
                   'Ensure the value is between 1 and 31 and an integer.'.format(select_metrics))
 
         if args.online is True and input_file_FLAG is False:
-            py_shark.live_capture()
+            py_shark.live_capture(mon_interface, display_filter)
 
         elif input_file_FLAG is True and args.online is False:
             pcap_file = args.input_file
@@ -111,7 +116,7 @@ def main():
             if args.quiet is False:
                 print('About to start filtering packets...\n')
             #  Call function to filter all packets.
-            pkt_list = py_shark.filter_packets(pcap_file)
+            pkt_list = py_shark.filter_packets(pcap_file, display_filter)
 
             if args.quiet is False:
                 print('All packets filtered. \n'
