@@ -1,4 +1,4 @@
-import csv
+import time
 import numpy as np
 from ds import DempsterShafer
 from pyds.pyds import MassFunction
@@ -15,6 +15,7 @@ class PacketAnalysis:
         self._sw_dict = sw_dict
         self._sw_val = sw_val
         self._features_to_analyse = features_to_analyse
+        if 'ds_timer' in kwargs: self._ds_timer = kwargs['ds_timer']
 
     def process_packets(self):
         """
@@ -25,7 +26,7 @@ class PacketAnalysis:
         inst_bpa = AutoBPA
         print(inst_bpa)
 
-        # create dyanmic instances of AutoBPA class
+        # create dynamic instances of AutoBPA class
         instance_dict, ttl_array = inst_bpa.create_instance(self._features_to_analyse,
                                                             self._sw_dict, self._sw_val)
         # function variables
@@ -67,8 +68,16 @@ class PacketAnalysis:
                 if not len(MF_list) == (len(self._features_to_analyse) - 1):
                     MF_list.append(m)
             # print(data_list)
+
             # Combine all the mass functions into one result for N, A, U
-            result = ds.fuse_metrics(m, MF_list)
+            # If ds_time flag is set then also calculate the time it takes to fuse metrics
+            if self._ds_timer is True:
+                start = time.time()
+                result = ds.fuse_metrics(m, MF_list)
+                ds_calc_time = time.time() - start
+                print(ds_calc_time)
+            else:
+                result = ds.fuse_metrics(m, MF_list)
 
             # find the maximum out of N, A, U for the combined DS values
             bpa_result = max(result.keys(), key=(lambda key: result[key]))
@@ -148,6 +157,21 @@ class PacketAnalysis:
             self._array_dict[metric] = np.delete(array, count)
             # print(self._array_dict[metric][(count-5):(count+5)])
         # return self._array_dict
+
+    def debug_file(self):
+        """
+
+        :return:
+        """
+        # Current frame no.
+        # Current frame metric data
+        # Current sliding window data
+        # Distances for each metric
+        # DS probabilities, BPA's, time to calculate
+        # Fusion results for each metric
+        # Averages for each metric
+        # Final result for frame
+        # Current number of malicious frames detected
 
     # def list_to_array(self, lists):
     #     lists = [lists]
