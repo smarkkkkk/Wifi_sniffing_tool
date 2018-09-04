@@ -29,19 +29,37 @@ if __name__ == "__main__":
     output_file = 'data.csv'
     sw_val = 30
     select_metrics = 31
+    capture_filter = '(wlan.sa==00:25:9c:cf:8a:73 || ' \
+                     'wlan.sa==00:25:9c:cf:8a:71) &&'  \
+                     '(wlan.da==40:c3:36:07:d4:bf || ' \
+                     'wlan.da==ff:ff:ff:ff:ff:ff) '    \
+                     '&&!(wlan.fc.type==0)&&tcp'
+
+    interface = 'mon0'
 
     # Initialise cmd line argument parser and flags
     ap = argparse.ArgumentParser()
-    ap.add_argument("-f", "--input_file",
+    ap.add_argument("-r", "--input_file",
                     help="the pcap file to load (include path if not in wd)")
     ap.add_argument("-a", "--output_file",
                     help="specify file to save packet data too")
+    ap.add_argument("-w", "--sliding_window",
+                    help="the number of packets to include in sliding window, (e.g. 10, 30, 50, 100)")
+    ap.add_argument("-s", "--features", type=int,
+                    help="integer to select which metrics should be used. See \"select_metrics.txt\" for further info.")
+    ap.add_argument("-f", "--capture_filter",
+                    help="capture filter to apply to packets")
+    ap.add_argument("-i", "--interface",
+                    help="interface to sniff on")
+
+    ap.add_argument("-t", "--ds_time", action="store_true",
+                    help="calculate time for DS (Dempster Shafer) algorithm to compute")
+    ap.add_argument("-q", "--quiet", action="store_true",
+                    help="run program in quiet mode")
+    ap.add_argument("-d", "--debug_file", action="store_true",
+                    help="print debug info in txt file")
     ap.add_argument("-o", "--online", action='store_true',
                     help="initiate online packet sniffing")
-    ap.add_argument("-s", "--sliding_window",
-                    help="the number of packets to include in sliding window, (e.g. 10, 30, 50, 100)")
-    ap.add_argument("-b", "--features", type=int,
-                    help="integer to select which metrics should be used. See \"select_metrics.txt\" for further info.")
 
     # read arguments from the command line
     args = ap.parse_args()
@@ -49,10 +67,6 @@ if __name__ == "__main__":
     # ensure sliding window value is an integer
     if args.sliding_window:
         sw_val = int(args.sliding_window)
-        # print(sw_val)
-        # print(isinstance(sw_val, int))
-        # if not isinstance(sw_val, int):
-        #     raise ValueError('Sliding window value must be an integer, (e.g. 10, 30, 50, 100)')
 
     # assign cmd line arguments to program variables
     if args.output_file:
@@ -70,7 +84,8 @@ if __name__ == "__main__":
         py_shark = PysharkTools()
 
         if metric_1.validate() is False:
-            raise ValueError
+            print('Select metrics value, {}, is incorrect.'
+                  'Ensure the value is between 1 and 31 and an integer.'.format(select_metrics))
 
         if args.online is True and input_file_FLAG is False:
             py_shark.live_capture()
@@ -85,7 +100,7 @@ if __name__ == "__main__":
             #  Call function to filter all packets.
             pkt_list = py_shark.filter_packets(pcap_file)
 
-            print('All packets filtered. '
+            print('All packets filtered. \n'
                   'Data is now being extracted from packets... \n')
 
             # Call function to extract relevant data from packets.
