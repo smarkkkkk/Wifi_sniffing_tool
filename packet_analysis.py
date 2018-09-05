@@ -3,8 +3,6 @@ import numpy as np
 from ds import DempsterShafer
 from pyds.pyds import MassFunction
 from autobpa import AutoBPA
-import pickle
-import json
 
 
 class PacketAnalysis:
