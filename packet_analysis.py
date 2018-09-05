@@ -13,12 +13,13 @@ class PacketAnalysis:
     final result which determines either sliding window or delete frame data.
     """
 
-    def __init__(self, array_dict, sw_dict, sw_val, features_to_analyse, **kwargs):
+    def __init__(self, array_dict, sw_dict, sw_val, features_to_analyse, quiet_flag, ds_timer, **kwargs):
         self._array_dict = array_dict
         self._sw_dict = sw_dict
         self._sw_val = sw_val
         self._features_to_analyse = features_to_analyse
-        if 'ds_timer' in kwargs: self._ds_timer = kwargs['ds_timer']
+        self._quiet = quiet_flag
+        self._ds_timer = ds_timer
 
     def process_packets(self):
         """
@@ -41,7 +42,7 @@ class PacketAnalysis:
         pkt_count = 0
         attack_count = 0
         incr = self._sw_val
-        print(len(self._array_dict['RSSI']))
+        # print(len(self._array_dict['RSSI']))
         # consider trying to multithread/multiprocess this secion, or use itertools to speed up the process.
         # potentially use itertools.product and dict.keys(), dict.values(), dict.items() to loop through them all
         # for incr in range(start, stop, step):
@@ -52,7 +53,7 @@ class PacketAnalysis:
             # not going to process
             data_list = []
             MF_list = []
-            print('Packet number {}'.format(pkt_count))
+            # print('Packet number {}'.format(pkt_count))
             # print('sw_dict inside packet processing: {}'.format(self._sw_dict))
             # print('\n\n')
             for array, inst in zip(self._array_dict.items(), instance_dict.items()):
@@ -82,7 +83,7 @@ class PacketAnalysis:
                 start = time.time()
                 result = ds.fuse_metrics(m, MF_list)
                 ds_calc_time = time.time() - start
-                print(ds_calc_time)
+                # print(ds_calc_time)
             else:
                 result = ds.fuse_metrics(m, MF_list)
 
@@ -108,7 +109,8 @@ class PacketAnalysis:
                 incr += 1
             elif 'a' in bpa_result:
                 attack_count += 1
-                print('ATTACK detected in packet {}. Closing web browser!'.format(pkt_count))
+                if self._quiet is False:
+                    print('ATTACK detected in packet {}. Closing web browser!'.format(pkt_count))
                 # print('Data that needs to be deleted: {}'.format(data_list))
                 # print(self._array_dict['RSSI'][(incr - 5):(incr + 5)])
                 self.delete_frame_data(incr)
@@ -117,7 +119,6 @@ class PacketAnalysis:
             elif 'u' in bpa_result:
                 pass
             else:
-                print('Reached else and pass')
                 pass
 
             # if pkt_count == 700:
@@ -128,7 +129,8 @@ class PacketAnalysis:
             # pkt_count += 1
             #print('Incr value is: {}, '
                   #'pkt_count value is: {}'.format(incr, pkt_count))
-        print('Number of malicious frames detected: {} '.format(attack_count))
+        if self._quiet is False:
+            print('\nNumber of malicious frames detected: {} '.format(attack_count))
         # print(inst_bpa)
 
     def sliding_window(self, incr):
@@ -152,7 +154,8 @@ class PacketAnalysis:
                 self._sw_dict[sw_arrays[0]] = norm_arrays[start_val:incr]
                 # print(self._sw_dict[sw_arrays[0]])
         else:
-            print('Sliding window can no longer be implemented due to end of frames approaching!')
+            if self._quiet is False:
+                print('Sliding window can no longer be implemented due to end of frames approaching!')
         # return self._sw_dict
 
     def delete_frame_data(self, count):
@@ -163,7 +166,7 @@ class PacketAnalysis:
         """
         # print('ATTACK detected in packet {}. Closing web browser!'.format(count))
         for metric, array in self._array_dict.items():
-            print('Deleting data: {}'.format(self._array_dict[metric][count]))
+            # print('Deleting data: {}'.format(self._array_dict[metric][count]))
             # print(self._array_dict[metric][(count - 5):(count + 5)])
             # check the count value includes the sw_size and is incremented in the correct place
             self._array_dict[metric] = np.delete(array, count)
