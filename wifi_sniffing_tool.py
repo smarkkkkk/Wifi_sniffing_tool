@@ -45,7 +45,7 @@ def main():
                      'wlan.da==ff:ff:ff:ff:ff:ff) '    \
                      '&&!(wlan.fc.type==0)&&tcp'
 
-    display_filter = '!(wlan.fc.type==0)&&tcp'
+    # display_filter = '!(wlan.fc.type==0)&&tcp'
 
     mon_interface = 'mon0'
 
@@ -133,11 +133,13 @@ def main():
                 print('Offline mode enabled\n')
                 print('Input file: [{}]\n'
                       'Sliding window size: [{}]\n'
-                      'Capture filter: [{}]\n'
+                      'Capture filter: [\'{}\']\n'
                       'Features integer: [{}]\n'
                       'DS timing: [{}]\n'
-                      'Debug file: [{}]\n'.format(pcap_file, sw_val, display_filter,
-                                                select_metrics, ds_timer, debug_file_FLAG))
+                      'Debug file: [{}]\n'
+                      'Runtime Warning suppression: [{}]'.format(pcap_file, sw_val, display_filter,
+                                                                 select_metrics, ds_timer, debug_file_FLAG,
+                                                                 warning_flag))
                 print('About to start filtering packets...\n')
             #  Call function to filter all packets.
             pkt_list = py_shark.filter_packets(pcap_file, display_filter)
