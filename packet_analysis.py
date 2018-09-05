@@ -36,7 +36,7 @@ class PacketAnalysis:
 
         # create dynamic instances of AutoBPA class
         instance_dict = inst_bpa.create_instance(self._features_to_analyse,
-                                                            self._sw_dict, self._sw_val)
+                                                 self._sw_dict, self._sw_val)
         # function variables
         pkt_count = 0
         attack_count = 0
@@ -45,10 +45,6 @@ class PacketAnalysis:
         # consider trying to multithread/multiprocess this secion, or use itertools to speed up the process.
         # potentially use itertools.product and dict.keys(), dict.values(), dict.items() to loop through them all
         while incr < len(self._array_dict['RSSI']):
-            # potentially replace the following 2 for loops and if statement with zip function. As long as array_dict
-            # and instance_dict have the same arrays in them in the same order it should work fine.
-            # potentially use itertools.compress to remove redundant arrays, i.e. metrics, that we are
-            # not going to process
             data_list = []
             MF_list = []
             # print('Packet number {}'.format(pkt_count))
@@ -86,7 +82,6 @@ class PacketAnalysis:
             bpa_result = max(result.keys(), key=(lambda key: result[key]))
 
             if 'n' in bpa_result:
-
                 self.sliding_window(incr)
                 instance_dict = inst_bpa.create_instance(self._features_to_analyse,
                                                          self._sw_dict, self._sw_val)
@@ -101,9 +96,23 @@ class PacketAnalysis:
                 attack_count += 1
 
             elif 'u' in bpa_result:
-                pass
+                if self._quiet is False:
+                    print('Uncertainty has the highest probability. Determining how to classify packet...')
+                if bpa_result['n'] >= bpa_result['a']:
+                    self.sliding_window(incr)
+                    instance_dict = inst_bpa.create_instance(self._features_to_analyse,
+                                                             self._sw_dict, self._sw_val)
+                    pkt_count += 1
+                    incr += 1
+                else:
+                    if self._quiet is False:
+                        print('ATTACK detected in packet {}. Closing web browser!'.format(pkt_count))
+                    self.delete_frame_data(incr)
+                    pkt_count += 1
+                    attack_count += 1
             else:
-                pass
+                if self._quiet is False:
+                    print('Unhandled packet.')
 
             self.debug_file(pkt_count, attack_count, data_list)
 
