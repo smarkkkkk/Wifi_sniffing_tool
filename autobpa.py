@@ -25,8 +25,7 @@ class AutoBPA(PacketStatistics):
         :param value: current data value being analysed
         :return: self._normal_bpa: probability of normal
         """
-        # This will use quartiles from a box and whisker plot in PacketStatistics
-        # to assign a BPA for normal based on the metric value
+
         min_val = self._lower_quart - (1.5 * self._inter_quart_range)
         max_val = self._upper_quart + (1.5 * self._inter_quart_range)
 
@@ -50,13 +49,16 @@ class AutoBPA(PacketStatistics):
 
         :return: self._attack_bpa: probability of attack
         """
-        # Euclidean distance of current value from reference point and reference to max value
+
         self._attack_bpa = (self._dist_mean * 0.5) / self._dist_maxval
 
+        # This should handle cases where A is too high for the adjustment formula to handle
+        # and in the case where it is NaN it needs to be assigned a very low value
+        # NaN arises from a divide by zero in the Attack formula due to distance
+        # to max val being zero.
         if self._attack_bpa > 0.5:
             self._attack_bpa = 0.5
-
-        if math.isnan(self._attack_bpa):
+        elif math.isnan(self._attack_bpa):
             self._attack_bpa = 0.000001
 
         return self._attack_bpa
@@ -70,7 +72,7 @@ class AutoBPA(PacketStatistics):
 
         :return: self._uncertainty_bpa: probability of uncertainty
         """
-        # Min of N and A divided by Max of N and A
+
         if self._normal_bpa > self._attack_bpa:
             min_bpa = self._attack_bpa
             max_bpa = self._normal_bpa
@@ -94,13 +96,16 @@ class AutoBPA(PacketStatistics):
 
         :return: self._adjust_bpa: value needed to take from each probability for the sum to add to 1
         """
-        # Calculate the adjustment factor to be applied to each bpa
+
         self._adjust_bpa = ((self._normal_bpa + self._attack_bpa + self._uncertainty_bpa) - 1) / 3
 
-        n_phi = self._normal_bpa / (self._normal_bpa + self._attack_bpa + self._uncertainty_bpa)
-        a_phi = self._attack_bpa / (self._normal_bpa + self._attack_bpa + self._uncertainty_bpa)
-        u_phi = self._uncertainty_bpa /(self._normal_bpa + self._attack_bpa + self._uncertainty_bpa)
-        return self._adjust_bpa, n_phi, a_phi, u_phi
+        # Alternate formula for normalising N, A, U would use the below code
+        # n_phi = self._normal_bpa / (self._normal_bpa + self._attack_bpa + self._uncertainty_bpa)
+        # a_phi = self._attack_bpa / (self._normal_bpa + self._attack_bpa + self._uncertainty_bpa)
+        # u_phi = self._uncertainty_bpa /(self._normal_bpa + self._attack_bpa + self._uncertainty_bpa)
+        # return n_phi, a_phi, u_phi
+
+        return self._adjust_bpa
 
     def combined_value(self, value):
         """
