@@ -35,7 +35,7 @@ def main():
     added to the sliding window that produces the 'normal' network behaviour.
     """
     # Default settings
-    input_file = '/pcap_files/variable_rate_normal_mon_VP'
+    pcap_file = '/pcap_files/variable_rate_normal_mon_VP'
     output_file = 'data.csv'
     sw_val = 30
     select_metrics = 31
@@ -79,13 +79,11 @@ def main():
     # read arguments from the command line
     args = ap.parse_args()
 
-    # ensure sliding window value is an integer
+    # assign cmd line arguments to program variables
     if args.sliding_window:
         sw_val = int(args.sliding_window)
-
-    # assign cmd line arguments to program variables
-    if args.output_file:
-        data_file = args.output_file
+    # if args.output_file:
+    #     data_file = args.output_file
     if args.input_file:
         input_file_FLAG = True
     else:
@@ -100,6 +98,8 @@ def main():
         display_filter = str(args.capture_filter)
     if args.interface:
         mon_interface = str(args.interface)
+    if args.input_file:
+        pcap_file = args.input_file
 
     debug_file_FLAG = args.debug_file
     quiet = args.quiet
@@ -124,8 +124,6 @@ def main():
             py_shark.live_capture(mon_interface, display_filter)
 
         elif input_file_FLAG is True and args.online is False:
-            pcap_file = args.input_file
-
             if os.path.exists(pcap_file) is False:
                 raise FileNotFoundError()
 
@@ -140,7 +138,8 @@ def main():
                       'Runtime Warning suppression: [{}]'.format(pcap_file, sw_val, display_filter,
                                                                  select_metrics, ds_timer, debug_file_FLAG,
                                                                  warning_flag))
-                print('About to start filtering packets...\n')
+                print('About to start filtering packets.\n')
+
             #  Call function to filter all packets.
             pkt_list = py_shark.filter_packets(pcap_file, display_filter)
 
@@ -151,19 +150,9 @@ def main():
             # Call function to extract relevant data from packets.
             dbm_antsignal, datarate, duration, seq, ttl, metric_dict = py_shark.extract_data(pkt_list)
 
-            # when extract_data is updated the new PacketAnalysis class will
-            # only need metric_dict to work correctly
-            # metric_dict = py_shark.extract_data(pkt_list)
-            # calls function to process packets, calc. DS and
-            # fuse metrics producing N, A, U for each frame
+            # main packet processing function. See function definitions for more details
             feature_analysis.oo_function(metric_dict, select_metrics, sw_val, ds_timer, quiet)
 
-            # feature_analysis.metric_analysis(dbm_antsignal, datarate, duration, seq, ttl, sw_val, select_metrics)
-
-            # array_dict, ave_dict, sw_dict = initialise_feature_arrays(dbm_antsignal, datarate,
-            #                                                           duration, seq, ttl, sw_val)
-            #
-            # packet_analysis(array_dict, ave_dict, sw_dict, sw_val)
             if args.quiet is False:
                 print('Program finished without error.\n')
 
@@ -174,11 +163,8 @@ def main():
 
     except FileNotFoundError:
         print('FileNotFoundError: file or directory does not exist.')
-    # except ValueError:
-    # print('ValueError: --features must be an integer between 1 and 31, see "select_metrics.txt" for help.')
     except:
         print(traceback.format_exc())
-
     finally:
         if args.quiet is False:
             print('Exiting program!')
