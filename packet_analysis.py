@@ -3,6 +3,8 @@ import numpy as np
 from ds import DempsterShafer
 from pyds.pyds import MassFunction
 from autobpa import AutoBPA
+import pickle
+import json
 
 
 class PacketAnalysis:
@@ -13,7 +15,7 @@ class PacketAnalysis:
     final result which determines either sliding window or delete frame data.
     """
 
-    def __init__(self, array_dict, sw_dict, sw_val, features_to_analyse, quiet_flag, ds_timer, **kwargs):
+    def __init__(self, array_dict, sw_dict, sw_val, features_to_analyse, quiet_flag, ds_timer):
         self._array_dict = array_dict
         self._sw_dict = sw_dict
         self._sw_val = sw_val
@@ -30,22 +32,20 @@ class PacketAnalysis:
         :param:
         :return:
         """
+        # class instances
         ds = DempsterShafer()
         inst_bpa = AutoBPA
-        # print(inst_bpa)
 
         # create dynamic instances of AutoBPA class
         instance_dict, ttl_array = inst_bpa.create_instance(self._features_to_analyse,
                                                             self._sw_dict, self._sw_val)
         # function variables
-        start, stop, step = self._sw_val + 1, len(self._array_dict['RSSI']), 1
         pkt_count = 0
         attack_count = 0
         incr = self._sw_val
-        # print(len(self._array_dict['RSSI']))
+
         # consider trying to multithread/multiprocess this secion, or use itertools to speed up the process.
         # potentially use itertools.product and dict.keys(), dict.values(), dict.items() to loop through them all
-        # for incr in range(start, stop, step):
         while incr < len(self._array_dict['RSSI']):
             # potentially replace the following 2 for loops and if statement with zip function. As long as array_dict
             # and instance_dict have the same arrays in them in the same order it should work fine.
@@ -54,28 +54,25 @@ class PacketAnalysis:
             data_list = []
             MF_list = []
             # print('Packet number {}'.format(pkt_count))
-            # print('sw_dict inside packet processing: {}'.format(self._sw_dict))
-            # print('\n\n')
+
             for array, inst in zip(self._array_dict.items(), instance_dict.items()):
 
                 data_list.append(array[1][incr])
 
-                # print('Metric: {}, value: {}'.format(inst[0],array[1][incr]))
                 mean = instance_dict[inst[0]].mean()
                 instance_dict[inst[0]].distance(array[1][incr])
                 instance_dict[inst[0]].box_plot()
-                # print('Metric: {}, mean: {}'.format(inst[0], mean))
+
                 # N, A, U (BPA) are returned in a dictionary
                 # that can be inputted into MF class
                 ds_dict = instance_dict[inst[0]].combined_value(value=array[1][incr])
-                # print('ds_dict for metric {}: {}'.format(inst[0], ds_dict))
+
                 # create instance of MF for each metric with the BPA value dictionary
                 m = MassFunction(ds_dict)
 
                 # append all metrics to list except the last one
                 if not len(MF_list) == (len(self._features_to_analyse) - 1):
                     MF_list.append(m)
-            # print(data_list)
 
             # Combine all the mass functions into one result for N, A, U
             # If ds_time flag is set then also calculate the time it takes to fuse metrics
@@ -83,55 +80,37 @@ class PacketAnalysis:
                 start = time.time()
                 result = ds.fuse_metrics(m, MF_list)
                 ds_calc_time = time.time() - start
-                # print(ds_calc_time)
+
             else:
                 result = ds.fuse_metrics(m, MF_list)
 
             # find the maximum out of N, A, U for the combined DS values
             bpa_result = max(result.keys(), key=(lambda key: result[key]))
-            # print(bpa_result)
+
             if 'n' in bpa_result:
-                # print('Reached n')
-                # print(self._sw_dict)
-                # print('self._sw_dict before sliding_window function: {}'.format(self._sw_dict))
-                # print('\n\n')
+
                 self.sliding_window(incr)
-                # print('self._sw_dict after sliding_window function: {}'.format(self._sw_dict))
-                # print('\n\n')
                 instance_dict, ttl_array = inst_bpa.create_instance(self._features_to_analyse,
                                                                     self._sw_dict, self._sw_val)
-                # print('self._sw_dict after new AutoBPA instances created function: {}'.format(self._sw_dict))
-                # print('\n\n')
-                # print(instance_dict)
-                # print(self._sw_dict)
-                # print(np.setdiff1d(self._sw_dict['TTL'], ttl_array))
                 pkt_count += 1
                 incr += 1
+
             elif 'a' in bpa_result:
-                attack_count += 1
                 if self._quiet is False:
                     print('ATTACK detected in packet {}. Closing web browser!'.format(pkt_count))
-                # print('Data that needs to be deleted: {}'.format(data_list))
-                # print(self._array_dict['RSSI'][(incr - 5):(incr + 5)])
                 self.delete_frame_data(incr)
                 pkt_count += 1
-                # print(self._array_dict['RSSI'][(incr-5):(incr+5)])
+                attack_count += 1
+
             elif 'u' in bpa_result:
                 pass
             else:
                 pass
 
-            # if pkt_count == 700:
-            #     break
+            self.debug_file(pkt_count, attack_count, data_list)
 
-            # print('\n\n')
-            # incr += 1
-            # pkt_count += 1
-            #print('Incr value is: {}, '
-                  #'pkt_count value is: {}'.format(incr, pkt_count))
         if self._quiet is False:
             print('\nNumber of malicious frames detected: {} '.format(attack_count))
-        # print(inst_bpa)
 
     def sliding_window(self, incr):
         """
@@ -142,21 +121,17 @@ class PacketAnalysis:
         :param incr: current frame increment value. Actually begins at the length of sliding window, not 0
         :return:
         """
-        # for x in range(start_value, stop=(len(metric_array)-window_size), step=1):
-        # print(start_value + self._sw_val)
-        # print(len((self._array_dict['RSSI'])))
+
         start_val = incr - self._sw_val
         end_val = incr
+
         if end_val < len((self._array_dict['RSSI'])):
             for norm_arrays, sw_arrays in zip(self._array_dict.values(), self._sw_dict.items()):
-                # print(start_value, (start_value+self._sw_val))
-                # print(self._sw_dict[sw_arrays[0]])
                 self._sw_dict[sw_arrays[0]] = norm_arrays[start_val:incr]
-                # print(self._sw_dict[sw_arrays[0]])
+
         else:
             if self._quiet is False:
                 print('Sliding window can no longer be implemented due to end of frames approaching!')
-        # return self._sw_dict
 
     def delete_frame_data(self, count):
         """
@@ -164,24 +139,19 @@ class PacketAnalysis:
         :param count: frame that needs to be deleted
         :return:
         """
-        # print('ATTACK detected in packet {}. Closing web browser!'.format(count))
-        for metric, array in self._array_dict.items():
-            # print('Deleting data: {}'.format(self._array_dict[metric][count]))
-            # print(self._array_dict[metric][(count - 5):(count + 5)])
-            # check the count value includes the sw_size and is incremented in the correct place
-            self._array_dict[metric] = np.delete(array, count)
-            # print(self._array_dict[metric][(count-5):(count+5)])
-        # return self._array_dict
 
-    def debug_file(self):
+        for metric, array in self._array_dict.items():
+            self._array_dict[metric] = np.delete(array, count)
+
+    def debug_file(self, pkt_count, attack_count, data_list):
         """
         This function will produce the debug file. It will write all necessary data to a file to enable
         debugging of the performance of the program.
 
         :return:
         """
-        # Current frame no.
-        # Current frame metric data
+        # Current frame no. //
+        # Current frame metric data  //
         # Current sliding window data
         # Distances for each metric
         # DS probabilities, BPA's, time to calculate
@@ -189,4 +159,33 @@ class PacketAnalysis:
         # Averages for each metric
         # Final result for frame
         # Current number of malicious frames detected
+        metric_list = ['RSSI', 'Rate', 'NAV', 'Seq', 'TTL']
 
+        with open('debug.txt', 'a') as debug_file:
+            debug_file.write('Frame number: %d\n' % pkt_count)
+            debug_file.write('Current frame data.')
+            # debug_file.write('\n')
+            debug_file.writelines('%s : %d ' % (metric, value) for metric, value in zip(self._features_to_analyse,
+                                                                                             data_list))
+            debug_file.write('Current sliding window data: \n')
+            # col_format = '{:<5}'*len(self._sw_dict) + '\n'
+            # for metric, sw_value in zip(self._features_to_analyse, self._sw_dict.values()):
+            for k, v in self._sw_dict.items():
+                if v == self._features_to_analyse[-1]:
+                    debug_file.write('{}: {} \n'.format(str(k), str(v)))
+                else:
+                    debug_file.write('{}: {}'.format(str(k), str(v)))
+
+
+            # for x in zip(self._sw_dict.values()):
+            #     debug_file.write(col_format.format(str(*x)))
+
+            # for arrays in self._sw_dict.values():
+            #     data =
+            # for metric in metric_list:
+            #     debug_file.write(metric)
+            #     debug_file.writelines(self._sw_dict[metric])
+            # debug_file.write(json.dumps(self._sw_dict))
+            debug_file.write('NUmber of malicious frames detected: %d \n' % attack_count)
+
+        debug_file.close()
