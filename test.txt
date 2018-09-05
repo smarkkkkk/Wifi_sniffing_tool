@@ -1,0 +1,28 @@
+Offline mode enabled
+
+Input file: [pcap_files/variable_rate_attack01_mon_VP]
+Sliding window size: [30]
+Capture filter: [(wlan.sa==00:25:9c:cf:8a:73 || wlan.sa==00:25:9c:cf:8a:71) && (wlan.da==40:c3:36:07:d4:bf || wlan.da==ff:ff:ff:ff:ff:ff) &&!(wlan.fc.type==0)&&tcp]
+Features integer: [31]
+DS timing: [False]
+Debug file: [False]
+
+About to start filtering packets...
+
+All packets filtered. 
+Data is now being extracted from packets... 
+
+ATTACK detected in packet 25. Closing web browser!
+ATTACK detected in packet 30. Closing web browser!
+ATTACK detected in packet 46. Closing web browser!
+ATTACK detected in packet 77. Closing web browser!
+ATTACK detected in packet 93. Closing web browser!
+ATTACK detected in packet 96. Closing web browser!
+ATTACK detected in packet 128. Closing web browser!
+ATTACK detected in packet 182. Closing web browser!
+ATTACK detected in packet 209. Closing web browser!
+ATTACK detected in packet 217. Closing web browser!
+Number of malicious frames detected: 10 
+Program finished without error.
+
+Exiting program!
