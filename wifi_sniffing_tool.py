@@ -159,7 +159,8 @@ def main():
         elif args.online is True and input_file_FLAG is True:
             raise IndexError()
         else:
-            print('Unknown error. Check cmd line flags, use --help for further info or select_metrics.txt')
+            print('Check cmd line flags, online and offline sniffing cannot be done at the same time.'
+                  'Use --help for further info or select_metrics.txt')
 
     except FileNotFoundError:
         print('FileNotFoundError: file or directory does not exist.')
