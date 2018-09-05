@@ -39,10 +39,10 @@ def main():
     sw_val = 30
     select_metrics = 31
     display_filter = '(wlan.sa==00:25:9c:cf:8a:73 ||'  \
-             'wlan.sa==00:25:9c:cf:8a:71) &&'  \
-             '(wlan.da==40:c3:36:07:d4:bf ||'  \
-             'wlan.da==ff:ff:ff:ff:ff:ff) '    \
-             '&&!(wlan.fc.type==0)&&tcp'
+                     'wlan.sa==00:25:9c:cf:8a:71) &&'  \
+                     '(wlan.da==40:c3:36:07:d4:bf ||'  \
+                     'wlan.da==ff:ff:ff:ff:ff:ff) '    \
+                     '&&!(wlan.fc.type==0)&&tcp'
 
     mon_interface = 'mon0'
 
@@ -160,4 +160,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
