@@ -7,10 +7,8 @@ The tool works by applying Dempster-Shafer data fusion techniques to analyse pac
 The IDS is based on the following journals: 
 
 KYRIAKOPOULOS, K.G., APARICIO-NAVARRO, F.J. and PARISH, D.J., 2014. "Manual and automatic assigned thresholds in multi-layer data fusion
-intrusion detection system for 802.11 attacks". IET Information Security, 8 (1), pp. 42 - 50.
+intrusion detection system for 802.11 attacks". IET Information Security, 8 (1), pp. 42 - 50. https://dspace.lboro.ac.uk/dspace-jspui/handle/2134/14105
 
-APARICIO-NAVARRO, F.J., KYRIAKOPOULOS, K.G., Gong, Y., PARISH, D.J., CHAMBERS, J.A., 2017. "Using Pattern-of-Life as Contextual Information for Anomaly-Based Intrusion Detection Systems". IEEE Access, 5, pp. 22177 - 22193.
-
-The research in these journals comes from a wider joint research programme between Loughborough University in the UK and King Saud University of Saudi Arabia. The research has been supported by the Gulf Science, Innovation and Knowledge Economy Programme of the U.K. Government under UK-Gulf Institutional Link Grant IL 279339985. Further information can be found at: http://www.lboro.ac.uk/departments/meme/research/research-groups/signal-processing-networks/int-collaboration/
+APARICIO-NAVARRO, F.J., KYRIAKOPOULOS, K.G., Gong, Y., PARISH, D.J., CHAMBERS, J.A., 2017. "Using Pattern-of-Life as Contextual Information for Anomaly-Based Intrusion Detection Systems". IEEE Access, 5, pp. 22177 - 22193. https://dspace.lboro.ac.uk/dspace-jspui/handle/2134/26600 
 
 Please feel free to use and experiment with this open source IDS. 
