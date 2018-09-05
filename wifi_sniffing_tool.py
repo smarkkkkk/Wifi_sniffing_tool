@@ -13,6 +13,7 @@ from scapy.all import *
 from select_metrics import SelectMetrics
 import feature_analysis
 from pyshark_tools import PysharkTools
+import autobpa
 
 
 def main():
@@ -71,6 +72,9 @@ def main():
                     help="print debug info in txt file")
     ap.add_argument("-o", "--online", action='store_true',
                     help="initiate online packet sniffing")
+    ap.add_argument("-x", "--suppress_warnings", action="store_true",
+                    help="calculating BPAs for some frames will trigger RuntimeWarnings due to dividing by zero, "
+                         "set this flag to suppress those particular warnings.")
 
     # read arguments from the command line
     args = ap.parse_args()
@@ -99,11 +103,16 @@ def main():
 
     debug_file_FLAG = args.debug_file
     quiet = args.quiet
-        
+    warning_flag = args.suppress_warnings
+
     # begin either online sniffing or loading from pcap file
     try:
         metric_1 = SelectMetrics(metric_val=select_metrics)
         py_shark = PysharkTools()
+
+        if warning_flag is True:
+            import warnings
+            warnings.filterwarnings(action='ignore', category=RuntimeWarning, module="autobpa")
 
         if metric_1.validate() is False:
             print('Select metrics value, {}, is incorrect.'
