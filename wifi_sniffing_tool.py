@@ -44,6 +44,8 @@ def main():
                      'wlan.da==ff:ff:ff:ff:ff:ff) '    \
                      '&&!(wlan.fc.type==0)&&tcp'
 
+    display_filter = '!(wlan.fc.type==0)&&tcp'
+
     mon_interface = 'mon0'
 
     # Initialise cmd line argument parser and flags
@@ -94,6 +96,9 @@ def main():
         display_filter = str(args.capture_filter)
     if args.interface:
         mon_interface = str(args.interface)
+
+    debug_file_FLAG = args.debug_file
+    quiet = args.quiet
         
     # begin either online sniffing or loading from pcap file
     try:
@@ -105,6 +110,8 @@ def main():
                   'Ensure the value is between 1 and 31 and an integer.'.format(select_metrics))
 
         if args.online is True and input_file_FLAG is False:
+            if quiet is False:
+                print('Starting Live Capture')
             py_shark.live_capture(mon_interface, display_filter)
 
         elif input_file_FLAG is True and args.online is False:
@@ -113,12 +120,20 @@ def main():
             if os.path.exists(pcap_file) is False:
                 raise FileNotFoundError()
 
-            if args.quiet is False:
+            if quiet is False:
+                print('Offline mode enabled\n')
+                print('Input file: [{}]\n'
+                      'Sliding window size: [{}]\n'
+                      'Capture filter: [{}]\n'
+                      'Features integer: [{}]\n'
+                      'DS timing: [{}]\n'
+                      'Debug file: [{}]\n'.format(pcap_file, sw_val, display_filter,
+                                                select_metrics, ds_timer, debug_file_FLAG))
                 print('About to start filtering packets...\n')
             #  Call function to filter all packets.
             pkt_list = py_shark.filter_packets(pcap_file, display_filter)
 
-            if args.quiet is False:
+            if quiet is False:
                 print('All packets filtered. \n'
                       'Data is now being extracted from packets... \n')
 
@@ -130,7 +145,7 @@ def main():
             # metric_dict = py_shark.extract_data(pkt_list)
             # calls function to process packets, calc. DS and
             # fuse metrics producing N, A, U for each frame
-            feature_analysis.oo_function(metric_dict, select_metrics, sw_val, ds_timer)
+            feature_analysis.oo_function(metric_dict, select_metrics, sw_val, ds_timer, quiet)
 
             # feature_analysis.metric_analysis(dbm_antsignal, datarate, duration, seq, ttl, sw_val, select_metrics)
 
