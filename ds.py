@@ -35,29 +35,18 @@ class DempsterShafer:
         :param mf_list: list containing MassFunctions for every other metric
         :return: m: final N, A, U dictionary containing final probabilities for fused metrics
         """
+        
         count = 0
         for m_list in mf_list:
-
             if count == 0:
-                # print('Last m is: {}, the first m in list is: {}'.format(m_last, m_list))
                 result = m_last.combine_disjunctive(m_list)
-                # print(result)
                 result = self.process_ds(result)
                 m = MassFunction(result)
                 count += 1
-                # print(m)
-            # elif count == len(MF_list):
-            #     return m
             else:
-                # print(m_list)
-                # print('Last m is: {}, the first m in list is: {}'.format(m, m_list))
                 result = m.combine_disjunctive(m_list)
-                # print('Unprocessed Result: {}'.format(result))
                 result = self.process_ds(result)
-                # print('Processed Result: {}'.format(result))
                 m = MassFunction(result)
-                # print('m inside loop: {}'.format(m))
-                # print(m)
                 count += 1
-        # print('MassFunction being returned: {}'.format(m))
+
         return m
