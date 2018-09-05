@@ -35,7 +35,7 @@ class DempsterShafer:
         :param mf_list: list containing MassFunctions for every other metric
         :return: m: final N, A, U dictionary containing final probabilities for fused metrics
         """
-        
+
         count = 0
         for m_list in mf_list:
             if count == 0:

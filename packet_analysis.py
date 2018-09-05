@@ -37,7 +37,7 @@ class PacketAnalysis:
         inst_bpa = AutoBPA
 
         # create dynamic instances of AutoBPA class
-        instance_dict, ttl_array = inst_bpa.create_instance(self._features_to_analyse,
+        instance_dict = inst_bpa.create_instance(self._features_to_analyse,
                                                             self._sw_dict, self._sw_val)
         # function variables
         pkt_count = 0
@@ -90,8 +90,8 @@ class PacketAnalysis:
             if 'n' in bpa_result:
 
                 self.sliding_window(incr)
-                instance_dict, ttl_array = inst_bpa.create_instance(self._features_to_analyse,
-                                                                    self._sw_dict, self._sw_val)
+                instance_dict = inst_bpa.create_instance(self._features_to_analyse,
+                                                         self._sw_dict, self._sw_val)
                 pkt_count += 1
                 incr += 1
 
