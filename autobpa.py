@@ -8,11 +8,7 @@ class AutoBPA(PacketStatistics):
     This class calculates the Basic Probability Assignments (N, A, U) for each metric of each frame.
     It is a child class of PacketStatistics.
     """
-    # alf = 0
 
-    # Putting new variables before kwargs seems to be allowed.
-    # **kwargs is a dictionary of keyword arguments that can take on any
-    # number of key, value pairs. No default values are set in Statistics class
     def __init__(self, sw, **kwargs):
         super().__init__(**kwargs)
         self._sw = sw
@@ -43,17 +39,6 @@ class AutoBPA(PacketStatistics):
         else:
             self._normal_bpa = 0.15
 
-        # if value is self._mean:
-        #     self._normal_bpa = 0.8
-        # print(self._normal_bpa)
-
-        # prev_norm = self._normal_bpa
-        #
-        # if math.isnan(self._normal_bpa):
-        #     self._normal_bpa = 0.5
-        #     print('normal has been reassigned')
-        #           '{}'
-        #           '{}'.format(prev_norm, self._normal_bpa))
         return self._normal_bpa
 
     def attack(self):
@@ -67,20 +52,12 @@ class AutoBPA(PacketStatistics):
         """
         # Euclidean distance of current value from reference point and reference to max value
         self._attack_bpa = (self._dist_mean * 0.5) / self._dist_maxval
-        # print(self._dist_mean, self._dist_maxval, self._attack_bpa)
-
-        # if self._attack_bpa is np.nan:
-        #     self._attack_bpa = 0.2
 
         if self._attack_bpa > 0.5:
             self._attack_bpa = 0.5
 
-        # prev_attack = self._attack_bpa
         if math.isnan(self._attack_bpa):
             self._attack_bpa = 0.000001
-        #     print('attack has been reassigned')
-        #     print(prev_attack)
-        #     print(self._attack_bpa)
 
         return self._attack_bpa
 
@@ -139,8 +116,7 @@ class AutoBPA(PacketStatistics):
         a = self.attack()
         u = self.uncertainty()
         phi, n_phi, a_phi, u_phi = self.adjustment_factor()
-        # print(n, a, u)
-        # print(n, a, u, phi)
+
         ds_dict['n'] = n - phi
         ds_dict['a'] = a - phi
         ds_dict['u'] = u - phi
@@ -168,21 +144,6 @@ class AutoBPA(PacketStatistics):
         # create an instance of each feature that is going to be analysed
         # and store the instances in a dictionary 'instance_dict'
         for feature, sw_dict_iter in zip(features_to_analyse, sw_dict.items()):
-            # for feature in features_to_analyse:
-            #     for key, arrays in sw_dict.items():
-            #         if feature == key:
-            name = feature + '_bpa'
-            # print('Creating instance of AutoBPA class called {}. '
-            #       'The Feature is : {}'.format(name, feature))
-            # print(sw_dict_iter[1])
-            # print(len(sw_dict_iter[1]))
-            #if len(sw_dict_iter[1]) != 30:
-                #print('sw_dict metric array data inside create_instance function: {}'.format(sw_dict_iter[1]))
-            # creates an instance of AutoBPA class
-            # instance = globals()[name] = AutoBPA(data=sw_dict_iter[1], sw=sw_size)
-            # instance_dict[sw_dict_iter[0]] = instance
-            # print('sw_dict metric array data inside create_instance function: {}'.format(sw_dict_iter[1]))
             instance_dict[sw_dict_iter[0]] = AutoBPA(data=sw_dict_iter[1], sw=sw_size)
-        ttl_array = sw_dict['TTL']
-        # print(instance_dict)
-        return instance_dict, ttl_array
+
+        return instance_dict
