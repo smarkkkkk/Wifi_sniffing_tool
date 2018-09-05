@@ -60,21 +60,36 @@ class PysharkTools:
         pkt_incr = 0
         pkt_data = np.zeros((len(dbm_antsignal), 5))
 
+        # while pkt_incr < len(dbm_antsignal):
+        #     pkt_data[pkt_incr][0] = dbm_antsignal[pkt_incr]
+        #     pkt_data[pkt_incr][1] = datarate[pkt_incr]
+        #     pkt_data[pkt_incr][2] = duration[pkt_incr]
+        #     pkt_data[pkt_incr][3] = seq[pkt_incr]
+        #     pkt_data[pkt_incr][4] = ttl[pkt_incr]
+        #     # print(dbm_antsignal[pkt_incr], datarate[pkt_incr], duration[pkt_incr], seq[pkt_incr], ttl[pkt_incr])
+        #     pkt_incr += 1
+        #
+        # np.savetxt('data.csv', pkt_data, fmt='%1.10e', delimiter='\t')
+        #
+        # metric_dict = {'RSSI': dbm_antsignal, 'Rate': datarate,
+        #                'NAV': duration, 'Seq': seq, 'TTL': ttl}
+
+        # RSSI, Rate, TTL, NAV, sequence number (MAC Layer - Not TCP seq number),
+        # and finally inter arrival time. I attach the txt file for attack02
+        pkt_data_kostas = np.zeros((len(dbm_antsignal), 5))
+
         while pkt_incr < len(dbm_antsignal):
-            pkt_data[pkt_incr][0] = dbm_antsignal[pkt_incr]
-            pkt_data[pkt_incr][1] = datarate[pkt_incr]
-            pkt_data[pkt_incr][2] = duration[pkt_incr]
-            pkt_data[pkt_incr][3] = seq[pkt_incr]
-            pkt_data[pkt_incr][4] = ttl[pkt_incr]
+            pkt_data_kostas[pkt_incr][0] = dbm_antsignal[pkt_incr]
+            pkt_data_kostas[pkt_incr][1] = datarate[pkt_incr]
+            pkt_data_kostas[pkt_incr][2] = ttl[pkt_incr]
+            pkt_data_kostas[pkt_incr][3] = duration[pkt_incr]
+            pkt_data_kostas[pkt_incr][4] = seq[pkt_incr]
+
             # print(dbm_antsignal[pkt_incr], datarate[pkt_incr], duration[pkt_incr], seq[pkt_incr], ttl[pkt_incr])
             pkt_incr += 1
+        np.savetxt('normal.txt', pkt_data_kostas,  delimiter='\t')
 
-        np.savetxt('data.csv', pkt_data, fmt='%1.10e', delimiter='\t')
-
-        metric_dict = {'RSSI': dbm_antsignal, 'Rate': datarate,
-                       'NAV': duration, 'Seq': seq, 'TTL': ttl}
-
-        return dbm_antsignal, datarate, duration, seq, ttl, metric_dict
+        return dbm_antsignal, datarate, duration, seq, ttl#, metric_dict
 
     @staticmethod
     def live_capture(mon_interface, disp_filter):
