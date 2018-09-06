@@ -13,13 +13,14 @@ class PacketAnalysis:
     final result which determines either sliding window or delete frame data.
     """
 
-    def __init__(self, array_dict, sw_dict, sw_val, features_to_analyse, quiet_flag, ds_timer):
+    def __init__(self, array_dict, sw_dict, sw_val, features_to_analyse, quiet_flag, ds_timer, debug_file):
         self._array_dict = array_dict
         self._sw_dict = sw_dict
         self._sw_val = sw_val
         self._features_to_analyse = features_to_analyse
         self._quiet = quiet_flag
         self._ds_timer = ds_timer
+        self._debug_file = debug_file
 
     def process_packets(self):
         """
@@ -47,6 +48,10 @@ class PacketAnalysis:
         while incr < len(self._array_dict['RSSI']):
             data_list = []
             MF_list = []
+            metric_means = []
+            distances = []
+            bpa_list = []
+
             # print('Packet number {}'.format(pkt_count))
 
             for array, inst in zip(self._array_dict.items(), instance_dict.items()):
@@ -54,8 +59,13 @@ class PacketAnalysis:
                 data_list.append(array[1][incr])
 
                 mean = instance_dict[inst[0]].mean()
-                instance_dict[inst[0]].distance(array[1][incr])
+                dist_maxval, dist_mean = instance_dict[inst[0]].distance(array[1][incr])
                 instance_dict[inst[0]].box_plot()
+
+                # create list of all stats to be used in debug file
+                metric_means.append(mean)
+                distances.append(dist_maxval)
+                distances.append(dist_mean)
 
                 # N, A, U (BPA) are returned in a dictionary
                 # that can be inputted into MF class
@@ -71,17 +81,24 @@ class PacketAnalysis:
             # Combine all the mass functions into one result for N, A, U
             # If ds_time flag is set then also calculate the time it takes to fuse metrics
             if self._ds_timer is True:
-                start = time.time()
-                result = ds.fuse_metrics(m, MF_list)
-                ds_calc_time = time.time() - start
+                # start = time.time()
+                result, ds_calc_time, ds_vals = ds.fuse_metrics(m, MF_list)
+                # print(len(ds_calc_time))
+                # ds_calc_time_total = time.time() - start
+                # print(ds_calc_time_total)
+                # ds_calc_time.append(ds_calc_time_total)
 
             else:
-                result = ds.fuse_metrics(m, MF_list)
+                result, ds_calc_time, ds_vals = ds.fuse_metrics(m, MF_list)
 
             # find the maximum out of N, A, U for the combined DS values
             bpa_result = max(result.keys(), key=(lambda key: result[key]))
 
             if 'n' in bpa_result:
+                if self._debug_file is True:
+                    self.debug_file(pkt_count, attack_count, data_list, ds_calc_time,
+                                    ds_vals, metric_means, distances)
+
                 self.sliding_window(incr)
                 instance_dict = inst_bpa.create_instance(self._features_to_analyse,
                                                          self._sw_dict, self._sw_val)
@@ -91,14 +108,24 @@ class PacketAnalysis:
             elif 'a' in bpa_result:
                 if self._quiet is False:
                     print('ATTACK detected in packet {}. Closing web browser!'.format(pkt_count))
+
+                if self._debug_file is True:
+                    self.debug_file(pkt_count, attack_count, data_list, ds_calc_time,
+                                    ds_vals, metric_means, distances)
+
                 self.delete_frame_data(incr)
                 pkt_count += 1
                 attack_count += 1
 
             elif 'u' in bpa_result:
                 if self._quiet is False:
-                    print('Uncertainty has the highest probability. Determining how to classify packet...')
+                    print('Uncertainty has the highest probability.')
+
                 if bpa_result['n'] >= bpa_result['a']:
+                    if self._debug_file is True:
+                        self.debug_file(pkt_count, attack_count, data_list, ds_calc_time,
+                                        ds_vals, metric_means, distances)
+
                     self.sliding_window(incr)
                     instance_dict = inst_bpa.create_instance(self._features_to_analyse,
                                                              self._sw_dict, self._sw_val)
@@ -107,14 +134,16 @@ class PacketAnalysis:
                 else:
                     if self._quiet is False:
                         print('ATTACK detected in packet {}. Closing web browser!'.format(pkt_count))
+                    if self._debug_file is True:
+                        self.debug_file(pkt_count, attack_count, data_list, ds_calc_time,
+                                        ds_vals, metric_means, distances)
+
                     self.delete_frame_data(incr)
                     pkt_count += 1
                     attack_count += 1
             else:
                 if self._quiet is False:
                     print('Unhandled packet.')
-
-            self.debug_file(pkt_count, attack_count, data_list)
 
         if self._quiet is False:
             print('\nNumber of malicious frames detected: {} '.format(attack_count))
@@ -150,7 +179,7 @@ class PacketAnalysis:
         for metric, array in self._array_dict.items():
             self._array_dict[metric] = np.delete(array, count)
 
-    def debug_file(self, pkt_count, attack_count, data_list):
+    def debug_file(self, pkt_count, attack_count, data_list, ds_calc_time, ds_vals, metric_means, distances):
         """
         This function will produce the debug file. It will write all necessary data to a file to enable
         debugging of the performance of the program.
@@ -167,32 +196,21 @@ class PacketAnalysis:
         # Final result for frame
         # Current number of malicious frames detected
         metric_list = ['RSSI', 'Rate', 'NAV', 'Seq', 'TTL']
-
+        x = [1, 2, 3, 4, 5]
         with open('debug.txt', 'a') as debug_file:
-            debug_file.write('Frame number: %d\n' % pkt_count)
-            debug_file.write('Current frame data.')
-            # debug_file.write('\n')
-            debug_file.writelines('%s : %d ' % (metric, value) for metric, value in zip(self._features_to_analyse,
-                                                                                             data_list))
-            debug_file.write('Current sliding window data: \n')
-            # col_format = '{:<5}'*len(self._sw_dict) + '\n'
-            # for metric, sw_value in zip(self._features_to_analyse, self._sw_dict.values()):
-            for k, v in self._sw_dict.items():
-                if v == self._features_to_analyse[-1]:
-                    debug_file.write('{}: {} \n'.format(str(k), str(v)))
-                else:
-                    debug_file.write('{}: {}'.format(str(k), str(v)))
+            debug_file.write('\nFrame number: %d\n' % pkt_count)
+            debug_file.write('Current frame data. \n')
+            debug_file.writelines('%s : %d \n ' % (metric, value) for metric, value in zip(self._features_to_analyse,
+                                                                                           data_list))
+            debug_file.write('\nCurrent sliding window data: \n')
+            debug_file.writelines('\n%s:\n %s \nMean value = %f \n' % (str(metric_array[0]), str(metric_array[1]), mean) for metric_array, mean in zip(self._sw_dict.items(), metric_means))
+            debug_file.write('\nDempster Shafer calculation times: \n')
 
+            if self._ds_timer is True:
+                debug_file.writelines('Iteration %d time (s) = %f\n' % (count, ds_time) for count, ds_time in zip(x, ds_calc_time))
+                debug_file.write('Total time to calculate DS = %f (s)\n' % sum(ds_calc_time))
 
-            # for x in zip(self._sw_dict.values()):
-            #     debug_file.write(col_format.format(str(*x)))
+            debug_file.write('Number of malicious frames detected: %d \n' % attack_count)
 
-            # for arrays in self._sw_dict.values():
-            #     data =
-            # for metric in metric_list:
-            #     debug_file.write(metric)
-            #     debug_file.writelines(self._sw_dict[metric])
-            # debug_file.write(json.dumps(self._sw_dict))
-            debug_file.write('NUmber of malicious frames detected: %d \n' % attack_count)
 
         debug_file.close()
