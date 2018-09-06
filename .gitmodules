@@ -1,3 +1,0 @@
-[submodule "Anomaly"]
-	path = Anomaly_based_IDS
-	url = https://github.com/reineking/pyds.git
