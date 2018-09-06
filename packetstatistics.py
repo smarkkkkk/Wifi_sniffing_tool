@@ -59,6 +59,8 @@ class PacketStatistics:
 
         self._dist_mean = abs(self._mean - new_val)
 
+        return self._dist_maxval, self._dist_maxval
+
     def box_plot(self):
         """
         This function calculates the box plot quartiles of the data set, i.e. lower quartile (LQ),
