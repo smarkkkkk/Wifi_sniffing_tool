@@ -36,7 +36,9 @@ class PysharkTools:
         duration = []
         seq = []
         ttl = []
-
+        # inter_arrival_time = []
+        # old_time = 0
+        
         # Extract all data from packets into lists.
         # This loop is the bottleneck, investigate ways to speed it up. ~11.6 seconds to process the normal pcap file
         for pkt in filtered_packets:
@@ -46,12 +48,20 @@ class PysharkTools:
             seq.append(float(pkt.wlan.seq))
             ttl.append(float(pkt.ip.ttl))
 
+            # code to calculate inter-arrival time between packets
+            # pkt_time = float(str(pkt.sniff_time.second) + '.' + str(pkt.sniff_time.microsecond))
+            # inter_time = pkt_time - old_time
+            # inter_arrival_time.append(inter_time)
+            # old_time = pkt_time
+
         # Convert all packet feature lists to numpy arrays
         dbm_antsignal = np.asarray(dbm_antsignal)
         datarate = np.asarray(datarate)
         duration = np.asarray(duration)
         seq = np.asarray(seq)
         ttl = np.asarray(ttl)
+
+        # inter_arrival_time = np.asarray(inter_arrival_time)
 
         # Write all packet feature data to .csv file
         pkt_incr = 0
@@ -72,18 +82,23 @@ class PysharkTools:
 
         # RSSI, Rate, TTL, NAV, sequence number (MAC Layer - Not TCP seq number),
         # and finally inter arrival time. I attach the txt file for attack02
-        # pkt_data_kostas = np.zeros((len(dbm_antsignal), 5))
-
+        # pkt_data_kostas = np.zeros((len(dbm_antsignal), 6))
+        #
         # while pkt_incr < len(dbm_antsignal):
         #     pkt_data_kostas[pkt_incr][0] = dbm_antsignal[pkt_incr]
         #     pkt_data_kostas[pkt_incr][1] = datarate[pkt_incr]
         #     pkt_data_kostas[pkt_incr][2] = ttl[pkt_incr]
         #     pkt_data_kostas[pkt_incr][3] = duration[pkt_incr]
         #     pkt_data_kostas[pkt_incr][4] = seq[pkt_incr]
+        #     pkt_data_kostas[pkt_incr][5] = inter_arrival_time[pkt_incr]
         #
         #     # print(dbm_antsignal[pkt_incr], datarate[pkt_incr], duration[pkt_incr], seq[pkt_incr], ttl[pkt_incr])
         #     pkt_incr += 1
-        # np.savetxt('normal.txt', pkt_data_kostas, fmt='% 4d', delimiter='\t')
+        #
+        # # Initial inter-arrival time is zero
+        # pkt_data_kostas[0][5] = 0
+        #
+        # np.savetxt('inthemix.txt', pkt_data_kostas, fmt='% 4f', delimiter='\t')
 
         return dbm_antsignal, datarate, duration, seq, ttl, metric_dict
 
