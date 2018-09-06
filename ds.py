@@ -1,5 +1,5 @@
 from pyds.pyds import MassFunction
-
+import time
 
 class DempsterShafer:
     """
@@ -35,18 +35,25 @@ class DempsterShafer:
         :param mf_list: list containing MassFunctions for every other metric
         :return: m: final N, A, U dictionary containing final probabilities for fused metrics
         """
-
+        ds_calc_time = []
+        ds_vals = []
         count = 0
+
         for m_list in mf_list:
             if count == 0:
+                start = time.time()
                 result = m_last.combine_disjunctive(m_list)
                 result = self.process_ds(result)
+                ds_vals.append(result)
                 m = MassFunction(result)
+                ds_calc_time.append((time.time()-start))
                 count += 1
             else:
+                start = time.time()
                 result = m.combine_disjunctive(m_list)
                 result = self.process_ds(result)
                 m = MassFunction(result)
+                ds_calc_time.append((time.time() - start))
                 count += 1
 
-        return m
+        return m, ds_calc_time, ds_vals
