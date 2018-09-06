@@ -13,7 +13,7 @@ from scapy.all import *
 from select_metrics import SelectMetrics
 import feature_analysis
 from pyshark_tools import PysharkTools
-import autobpa
+import os
 
 
 def main():
@@ -114,6 +114,11 @@ def main():
             import warnings
             warnings.filterwarnings(action='ignore', category=RuntimeWarning, module="autobpa")
 
+        # ensures that any previous debug file is removed before new data is appended to it.
+        if debug_file_FLAG is True:
+            if os.path.exists('debug.txt'):
+                os.remove('debug.txt')
+
         if metric_1.validate() is False:
             print('Select metrics value, {}, is incorrect.'
                   'Ensure the value is between 1 and 31 and an integer.'.format(select_metrics))
@@ -151,9 +156,10 @@ def main():
             dbm_antsignal, datarate, duration, seq, ttl, metric_dict = py_shark.extract_data(pkt_list)
 
             # main packet processing function. See function definitions for more details
-            feature_analysis.oo_function(metric_dict, select_metrics, sw_val, ds_timer, quiet)
+            feature_analysis.oo_function(metric_dict, select_metrics, sw_val, ds_timer,
+                                         quiet, debug_file_FLAG)
 
-            if args.quiet is False:
+            if quiet is False:
                 print('Program finished without error.\n')
 
         elif args.online is True and input_file_FLAG is True:
@@ -167,7 +173,7 @@ def main():
     except:
         print(traceback.format_exc())
     finally:
-        if args.quiet is False:
+        if quiet is False:
             print('Exiting program!')
 
 
