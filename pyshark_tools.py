@@ -38,7 +38,7 @@ class PysharkTools:
         ttl = []
         # inter_arrival_time = []
         # old_time = 0
-        
+
         # Extract all data from packets into lists.
         # This loop is the bottleneck, investigate ways to speed it up. ~11.6 seconds to process the normal pcap file
         for pkt in filtered_packets:
