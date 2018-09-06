@@ -2,7 +2,7 @@ from select_metrics import SelectMetrics
 from packet_analysis import PacketAnalysis
 
 
-def oo_function(metric_dict, select_metrics, sw_val, ds_timer, quiet):
+def oo_function(metric_dict, select_metrics, sw_val, ds_timer, quiet, debug_file):
 
     slt_metrics = SelectMetrics(metric_val=select_metrics)
 
@@ -15,6 +15,6 @@ def oo_function(metric_dict, select_metrics, sw_val, ds_timer, quiet):
 
     pa = PacketAnalysis(array_dict=metric_dict, sw_dict=sw_dict,
                         sw_val=sw_val, features_to_analyse=features_to_analyse,
-                        ds_timer=ds_timer, quiet_flag=quiet)
+                        ds_timer=ds_timer, quiet_flag=quiet, debug_file=debug_file)
 
     pa.process_packets()
