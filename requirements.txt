@@ -1,0 +1,4 @@
+numpy vers.   >= 1.15.0
+pyshark vers. >= 1.5.4
+scapy vers.   >= 2.4.1
+scipy vers.   >= 1.1.0 

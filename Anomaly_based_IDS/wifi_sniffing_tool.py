@@ -35,7 +35,7 @@ def main():
     added to the sliding window that produces the 'normal' network behaviour.
     """
     # Default settings
-    pcap_file = '/pcap_files/variable_rate_normal_mon_VP'
+    pcap_file = 'pcap_files/variable_rate_normal_mon_VP'
     output_file = 'data.csv'
     sw_val = 30
     select_metrics = 31
@@ -128,7 +128,7 @@ def main():
                 print('Starting Live Capture')
             py_shark.live_capture(mon_interface, display_filter)
 
-        elif input_file_FLAG is True and args.online is False:
+        elif input_file_FLAG is True and args.online is False or input_file_FLAG is False and args.online is False:
             if os.path.exists(pcap_file) is False:
                 raise FileNotFoundError()
 
