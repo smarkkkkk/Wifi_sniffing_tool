@@ -1,0 +1,11 @@
+
+__pycache__/*.cpython-36.pyc
+
+__pycache__
+.idea/
+testing_stats_bpa.py
+*.pyc
+pyds/__pycache__/*.cpython-36.pyc
+Anomaly_based_IDS/pcap_files/.DS_Store
+data/pcap_files/.DS_Store
+*.cpython-36.pyc
