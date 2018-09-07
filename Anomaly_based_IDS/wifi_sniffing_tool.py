@@ -2,7 +2,7 @@
 Author: Jim Matthews
 Contact email: j.matthews-14@student.lboro.ac.uk
 Supervisor: Dr Kostas Kyriakopoulos, Signal Processing and Networks Research Group, Loughborough University
-Group URL: http://www.lboro.ac.uk/departments/meme/research/research-groups/signal-processing-networks/
+Research Group URL: http://www.lboro.ac.uk/departments/meme/research/research-groups/signal-processing-networks/
 Date: 4th September 2018
 This work was carried out as part of a Wolfson School of Mechanical, Electrical and Manufacturing
 Engineering funded summary bursary.
@@ -36,7 +36,7 @@ def main():
     """
     # Default settings
     pcap_file = 'pcap_files/variable_rate_normal_mon_VP'
-    output_file = 'data.csv'
+    # output_file = 'data.csv'
     sw_val = 30
     select_metrics = 31
     display_filter = '(wlan.sa==00:25:9c:cf:8a:73 ||'  \
@@ -107,9 +107,11 @@ def main():
 
     # begin either online sniffing or loading from pcap file
     try:
+        # class instances
         metric_1 = SelectMetrics(metric_val=select_metrics)
         py_shark = PysharkTools()
 
+        # suppress some RuntimeWarnings that arise from division by small numbers in AutoBPA
         if warning_flag is True:
             import warnings
             warnings.filterwarnings(action='ignore', category=RuntimeWarning, module="autobpa")
@@ -120,13 +122,14 @@ def main():
                 os.remove('debug.txt')
 
         if metric_1.validate() is False:
-            print('Select metrics value, {}, is incorrect.'
-                  'Ensure the value is between 1 and 31 and an integer.'.format(select_metrics))
+            print('Select metrics value, {}, is invalid.'
+                  'Ensure the value is between 1 and 31, inclusive, and an integer.'.format(select_metrics))
 
         if args.online is True and input_file_FLAG is False:
             if quiet is False:
                 print('Starting Live Capture')
-            py_shark.live_capture(mon_interface, display_filter)
+            print('Live Capture has not yet been implemented.')
+            # py_shark.live_capture(mon_interface, display_filter)
 
         elif input_file_FLAG is True and args.online is False or input_file_FLAG is False and args.online is False:
             if os.path.exists(pcap_file) is False:
