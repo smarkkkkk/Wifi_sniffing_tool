@@ -11,4 +11,4 @@ intrusion detection system for 802.11 attacks". IET Information Security, 8 (1),
 
 APARICIO-NAVARRO, F.J., KYRIAKOPOULOS, K.G., Gong, Y., PARISH, D.J., CHAMBERS, J.A., 2017. "Using Pattern-of-Life as Contextual Information for Anomaly-Based Intrusion Detection Systems". IEEE Access, 5, pp. 22177 - 22193. https://dspace.lboro.ac.uk/dspace-jspui/handle/2134/26600 
 
-Please feel free to use and experiment with this open source IDS. 
+Please reference the papers mentioned above if you use this IDS.  
