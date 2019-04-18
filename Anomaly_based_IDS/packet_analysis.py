@@ -54,13 +54,20 @@ class PacketAnalysis:
 
             # print('Packet number {}'.format(pkt_count))
 
-            for array, inst in zip(self._array_dict.items(), instance_dict.items()):
+            # modified by fxk
+            for metric, valList in self._array_dict.items():
+                data_list.append(valList[incr])
+                mean = instance_dict[metric].mean()
+                dist_maxval, dist_mean = instance_dict[metric].distance(valList[incr])
+                instance_dict[metric].box_plot()
 
-                data_list.append(array[1][incr])
-
-                mean = instance_dict[inst[0]].mean()
-                dist_maxval, dist_mean = instance_dict[inst[0]].distance(array[1][incr])
-                instance_dict[inst[0]].box_plot()
+            # for array, inst in zip(self._array_dict.items(), instance_dict.items()):
+            #
+            #     data_list.append(array[1][incr])
+            #
+            #     mean = instance_dict[inst[0]].mean()
+            #     dist_maxval, dist_mean = instance_dict[inst[0]].distance(array[1][incr])
+            #     instance_dict[inst[0]].box_plot()
 
                 # create list of all stats to be used in debug file
                 metric_means.append(mean)
@@ -69,7 +76,8 @@ class PacketAnalysis:
 
                 # N, A, U (BPA) are returned in a dictionary
                 # that can be inputted into MF class
-                ds_dict = instance_dict[inst[0]].combined_value(value=array[1][incr])
+                # ds_dict = instance_dict[inst[0]].combined_value(value=array[1][incr])
+                ds_dict = instance_dict[metric].combined_value(value=valList[incr])
 
                 # create instance of MF for each metric with the BPA value dictionary
                 m = MassFunction(ds_dict)
@@ -93,7 +101,7 @@ class PacketAnalysis:
 
             # find the maximum out of N, A, U for the combined DS values
             bpa_result = max(result.keys(), key=(lambda key: result[key]))
-
+            # print(bpa_result)
             if 'n' in bpa_result:
                 if self._debug_file is True:
                     self.debug_file(pkt_count, attack_count, data_list, ds_calc_time,
@@ -120,8 +128,9 @@ class PacketAnalysis:
             elif 'u' in bpa_result:
                 if self._quiet is False:
                     print('Uncertainty has the highest probability.')
-
-                if bpa_result['n'] >= bpa_result['a']:
+                # there exists a bug in my opinion (fxk)
+                # if bpa_result['n'] >= bpa_result['a']:
+                if result['n'] >= result['a']:
                     if self._debug_file is True:
                         self.debug_file(pkt_count, attack_count, data_list, ds_calc_time,
                                         ds_vals, metric_means, distances)
@@ -162,8 +171,11 @@ class PacketAnalysis:
         end_val = incr
 
         if end_val < len((self._array_dict['RSSI'])):
-            for norm_arrays, sw_arrays in zip(self._array_dict.values(), self._sw_dict.items()):
-                self._sw_dict[sw_arrays[0]] = norm_arrays[start_val:incr]
+            # for norm_arrays, sw_arrays in zip(self._array_dict.values(), self._sw_dict.items()):
+            #     self._sw_dict[sw_arrays[0]] = norm_arrays[start_val:incr]
+            for metric, valList in self._array_dict.items():
+                self._sw_dict[metric] = valList[start_val:incr]
+
 
         else:
             if self._quiet is False:

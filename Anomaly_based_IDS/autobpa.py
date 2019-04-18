@@ -49,8 +49,9 @@ class AutoBPA(PacketStatistics):
 
         :return: self._attack_bpa: probability of attack
         """
-
+        # print(self._dist_mean, self._dist_maxval)
         self._attack_bpa = (self._dist_mean * 0.5) / self._dist_maxval
+
 
         # This should handle cases where A is too high for the adjustment formula to handle
         # and in the case where it is NaN it needs to be assigned a very low value
@@ -148,7 +149,11 @@ class AutoBPA(PacketStatistics):
 
         # create an instance of each feature that is going to be analysed
         # and store the instances in a dictionary 'instance_dict'
-        for feature, sw_dict_iter in zip(features_to_analyse, sw_dict.items()):
-            instance_dict[sw_dict_iter[0]] = AutoBPA(data=sw_dict_iter[1], sw=sw_size)
+        # Here exists a bug!(fxk)
+        # for feature, sw_dict_iter in zip(features_to_analyse, sw_dict.items()):
+        #     instance_dict[sw_dict_iter[0]] = AutoBPA(data=sw_dict_iter[1], sw=sw_size)
+
+        for feature in features_to_analyse:
+            instance_dict[feature] = AutoBPA(data=sw_dict[feature], sw=sw_size)
 
         return instance_dict
